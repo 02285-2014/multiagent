@@ -4,7 +4,7 @@
 source server-header.sh
 
 # Additional settings
-configs=$( ls ${conf}/2013* )
+configs=$( ls ${conf}/02285* )
 resultPage=false;
 testServerMode=false;
 

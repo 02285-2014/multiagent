@@ -12,6 +12,7 @@
 
 
 <!ENTITY simulation1 SYSTEM "sim1.xml">
+<!ENTITY simulation1debug1 SYSTEM "sim1debug1.xml">
 <!ENTITY simulation2 SYSTEM "sim2.xml">
 <!ENTITY simulation3 SYSTEM "sim3.xml">
 <!ENTITY testsim1 SYSTEM "testsim1.xml">
