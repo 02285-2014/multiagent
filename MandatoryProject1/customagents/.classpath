@@ -2,8 +2,14 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/ahkjeldsen/multiagent/MandatoryProject1/javaagents/target/javaagents-2.1-javadoc.jar"/>
-	<classpathentry kind="lib" path="/Users/ahkjeldsen/multiagent/MandatoryProject1/javaagents/target/javaagents-2.1-sources.jar"/>
-	<classpathentry kind="lib" path="/Users/ahkjeldsen/multiagent/MandatoryProject1/javaagents/target/javaagents-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/eismassim-2.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/eismassim-2.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/eismassim-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/javaagents-2.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/javaagents-2.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/javaagents-2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
