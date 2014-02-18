@@ -1,6 +1,6 @@
 #!/bin/bash
 
-package=$( ls -t ../target/javaagents-*.jar | grep -v javadoc | grep -v sources | head -n1 )
+package=$( ls -t ../target/*agents*.jar | grep -v javadoc | grep -v sources | head -n1 )
 conf=conf/
 
 echo "Please choose a number and then press enter:"
@@ -32,6 +32,8 @@ done
 echo "Starting agents: $conf"
 
 #java -ea -Dcom.sun.management.jmxremote -Xss10000k -Xmx600M  -#DentityExpansionLimit=1000000 -DelementAttributeLimit=1000000 -#Djava.rmi.server.hostname=$hostname -jar $server --conf $conf | tee #backup/$date-$hostname.log
+
+echo "$package"
 
 cd $conf
 
