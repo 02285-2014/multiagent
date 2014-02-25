@@ -1,23 +1,28 @@
-package custommas.app;
+package massim.javaagents;
 
 import java.io.IOException;
 
-import massim.javaagents.*;
-
-import eis.*;
+import eis.EILoader;
+import eis.EnvironmentInterfaceStandard;
 import eis.exceptions.ManagementException;
 
+/**
+ * This app instantiates an interpreter (loading agents),
+ * creates the connection to the MASSim-server, and
+ * executes the agents.
+ *
+ */
 public class App {
-
-	public static void main(String[] args) {
+    
+	public static void main( String[] args ) {
+		
 		//  instantiate interpreter
 		System.out.println("PHASE 1: INSTANTIATING INTERPRETER");
 		AgentsInterpreter interpreter = null;
-		if (args.length != 0){ 
+		if ( args.length != 0 ) 
 			interpreter = new AgentsInterpreter(args[0]);
-		}else{
+		else
 			interpreter = new AgentsInterpreter();
-		}
 		System.out.println("interpreter loaded");
 
 		// load the interface
@@ -58,7 +63,9 @@ public class App {
 			interpreter.step();
 			step ++;
 			System.out.println("");
+			
 		}
+
 	}
 
 }

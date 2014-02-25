@@ -4,12 +4,12 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4-sources.jar"/>
-	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/agentcontest-2013-1.4.jar" sourcepath="lib/agentcontest-2013-1.4-sources.jar"/>
 	<classpathentry kind="lib" path="lib/eismassim-2.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/eismassim-2.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/eismassim-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/eismassim-2.1.jar" sourcepath="lib/eismassim-2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/javaagents-2.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/javaagents-2.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/javaagents-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/javaagents-2.1.jar" sourcepath="lib/javaagents-2.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
