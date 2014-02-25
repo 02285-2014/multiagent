@@ -5,21 +5,20 @@ import java.util.*;
 public class Node {
 	private String id;
 	private int value;
-	private ArrayList<Edge> adjacents;
+	private Set<String> adjacents;
 	
 	public Node(String name) {
 		this.id = name;
-		adjacents = new ArrayList<Edge>();
+		adjacents = new HashSet<String>();
 		this.value = Integer.MIN_VALUE;
 	}
 	
 	public Node(String name, int value) {
-		this.id = name;
-		this.value = value;
-		adjacents = new ArrayList<Edge>();
+		this(name);
+		this.value = value;;
 	}
 	
-	public String getID() {
+	public String getId() {
 		return id;
 	}
 	
@@ -31,12 +30,12 @@ public class Node {
 		this.value = newValue;
 	}
 	
-	public ArrayList<Edge> getAdjacents() {
+	public Set<String> getAdjacents() {
 		return adjacents;
 	}
 	
-	public void addAdjacent(Edge e) {
-		adjacents.add(e);
+	public void addAdjacent(String otherNode) {
+		adjacents.add(otherNode);
 	}
 	
 	@Override
@@ -44,7 +43,7 @@ public class Node {
 	    if (o instanceof Node) 
 	    {
 	      Node c = (Node) o;
-	      if ( this.getID().equals(c.getID()) )
+	      if ( this.getId().equals(c.getId()) )
 	         return true;
 	    }
 	    return false;
