@@ -1,16 +1,25 @@
 package custommas.lib;
 
 public class Edge implements Comparable<Edge> {
+	private static final int NonSurveyed = Integer.MIN_VALUE;
 	private Node v;
 	private Node w;
 	private int weight;
-	private int vFirst;
 	
-	public Edge(Node from, Node to, int weight) {
-		this.v = from;
-		this.w = to;
+	public Edge(Node node1, Node node2) {
+		if(node1.hashCode() >= node2.hashCode()){
+			this.v = node1;
+			this.w = node2;
+		}else{
+			this.v = node2;
+			this.w = node1;
+		}
+		this.weight = NonSurveyed;
+	}
+	
+	public Edge(Node node1, Node node2, int weight) {
+		this(node1, node2);
 		this.weight = weight;
-		this.vFirst = from.getId().compareTo(to.getId());
 	}
 	
 	public Node either() {
@@ -18,31 +27,31 @@ public class Edge implements Comparable<Edge> {
 	}
 	
 	public Node other(Node n) {
-		if(n.equals(v)) {
-			return w;
-		} else if(n.equals(w)) {
-			return v;
-		} else {
-			return null;
-		}
+		return n == v ? w : n == w ? v : null;
 	}
 	
-	public int weight() {
+	public int getWeight() {
 		return weight;
 	}
 	
 	public void setWeight(int newWeight) {
 		this.weight = newWeight;
 	}
+	
+	public boolean isSurveyed(){
+		return this.weight != NonSurveyed;
+	}
 
 	public int compareTo(Edge e) {
-		if      (this.weight() < e.weight()) { return -1; }
-        else if (this.weight() > e.weight()) { return +1; }
-        else { return  0; }
+		return Integer.compare(getWeight(), e.getWeight());
+	}
+	
+	public String getId(){
+		return EdgeWeightedGraph.getEdgeId(v.getId(), w.getId());
 	}
 	
 	@Override
 	public String toString(){
-		return vFirst >= 0 ? v.getId() + w.getId() : w.getId() + v.getId();
+		return "Edge(" + v.toString() + ", " + w.toString() + ")";
 	}
 }

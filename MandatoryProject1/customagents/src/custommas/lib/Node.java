@@ -1,16 +1,13 @@
 package custommas.lib;
 
-import java.util.*;
-
 public class Node {
+	private static final int NonProbed = Integer.MIN_VALUE;
 	private String id;
 	private int value;
-	private Set<String> adjacents;
 	
 	public Node(String name) {
 		this.id = name;
-		adjacents = new HashSet<String>();
-		this.value = Integer.MIN_VALUE;
+		this.value = NonProbed;
 	}
 	
 	public Node(String name, int value) {
@@ -22,7 +19,7 @@ public class Node {
 		return id;
 	}
 	
-	public int value() {
+	public int getValue() {
 		return value;
 	}
 	
@@ -30,22 +27,22 @@ public class Node {
 		this.value = newValue;
 	}
 	
-	public Set<String> getAdjacents() {
-		return adjacents;
-	}
-	
-	public void addAdjacent(String otherNode) {
-		adjacents.add(otherNode);
+	public boolean isProbed(){
+		return this.value != NonProbed;
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-	    if (o instanceof Node) 
-	    {
-	      Node c = (Node) o;
-	      if ( this.getId().equals(c.getId()) )
-	         return true;
-	    }
-	    return false;
+		return o instanceof Node && this.getId().equals(((Node)o).getId());
+	}
+	
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
+	
+	@Override
+	public String toString(){
+		return "Node(" + id + ")";
 	}
 }
