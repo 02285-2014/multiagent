@@ -57,7 +57,7 @@ public class ExplorerAgent extends CustomAgent{
 		act = planProbe(position/*, neighbourBeliefs*/);
 		if (act != null) return act;
 		
-		// 4. surveying if necessary (visibleEdge,surveyEdge,position)
+		//s 4. surveying if necessary (visibleEdge,surveyEdge,position)
 		act = planSurvey(position);
 		if (act != null) return act;
 		
@@ -82,6 +82,7 @@ public class ExplorerAgent extends CustomAgent{
 	
 	@SuppressWarnings("deprecation")
 	protected void handlePercepts(){
+		if(!_name.equals("agentA1")) return;
 		String position = null;
 
 		// check percepts
@@ -100,6 +101,18 @@ public class ExplorerAgent extends CustomAgent{
 			}
 			
 			if (p.getName().equals("visibleEntity")) {
+				LinkedList<Parameter> parameters = p.getParameters();
+				if(parameters.size() >= 4){
+					ListIterator<Parameter> parametersIterator = parameters.listIterator();
+					String entityName = parametersIterator.next().toProlog();
+					String entityNode = parametersIterator.next().toProlog();
+					String entityTeam = parametersIterator.next().toProlog();
+					String entityStatus = parametersIterator.next().toProlog();
+					
+					println("Visible entity with name " + entityName + " on node " + entityNode + 
+						" with status " + entityStatus + " for team " + entityTeam);
+				}
+				
 				LogicBelief b = MarsUtil.perceptToBelief(p);
 				if (!containsBelief(b)) {
 					addBelief(b);

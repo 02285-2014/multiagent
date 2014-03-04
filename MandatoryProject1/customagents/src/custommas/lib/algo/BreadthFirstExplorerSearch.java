@@ -22,7 +22,7 @@ public class BreadthFirstExplorerSearch {
         edgeTo = new HashMap<Node, Node>();
         marked.add(startNode);
         
-        if(!startNode.isProbed()) return startNode;
+        //if(!startNode.isProbed()) return startNode;
     	Queue<Node> q = new Queue<Node>();
         q.enqueue(startNode);
 

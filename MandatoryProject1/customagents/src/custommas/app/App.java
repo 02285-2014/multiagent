@@ -58,6 +58,8 @@ public class App {
 			interpreter.step();
 			step ++;
 			System.out.println("");
+			System.out.println("");
+			System.out.println("");
 		}
 	}
 
