@@ -11,33 +11,34 @@ public class Dijkstra {
 	private static PriorityQueue<DijkstraVertex> pq;
 	private static Map<String, DijkstraVertex> vertices;
 	
-	public static Collection<Node> getPath(EdgeWeightedGraph g, Node initial, Node goal) {
+	public static List<Node> getPath(EdgeWeightedGraph g, Node initial, Node goal) {
 		if(initial.equals(goal)) {
-			Set<Node> i = new HashSet<Node>();
+			List<Node> i = new ArrayList<Node>();
 			i.add(initial);
 			return i;
 		}
-		nodes = (Set<String>) g.getAllNodes();
+		nodes = (Set<String>) g.getAllNodeIds();
 		pq = new PriorityQueue<DijkstraVertex>();
 		vertices = new HashMap<String,DijkstraVertex>();
-		
-		distance = new HashMap<String, Integer>();
-		distance.put(initial.getId(), 0);
+		HashSet<String> visited = new HashSet<String>();
+
 		DijkstraVertex v = new DijkstraVertex(initial.getId(), 0);
 		pq.add(v);
 		vertices.put(initial.getId(), v);
 		
 		for(String s : nodes) {
 			if(!s.equals(initial.getId())) {
-				pq.add(new DijkstraVertex(s, maxDistance));
-				vertices.put(s,v);
+				DijkstraVertex vs = new DijkstraVertex(s, maxDistance);
+				pq.add(vs);
+				vertices.put(s,vs);
 			}
 		}
 		
 		while (!pq.isEmpty()) {
 		    DijkstraVertex u = pq.poll();
-		    
+		    visited.add(u.getId());
 		    for(Node n : g.getAdjacentTo(g.getNode(u.getId()))) {
+		    	if(visited.contains(n.getId())) continue;
 		    	Edge e = g.getEdgeFromNodes(g.getNode(u.getId()), n);
 		    	int weight = e.getWeight();
 		    	int distanceThroughU = u.setDistance(u.getDistance() + weight);

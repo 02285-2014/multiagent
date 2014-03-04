@@ -1,5 +1,8 @@
 package custommas.common;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SharedUtility {
 	// We believe node IDs are consistent with their syntax: s[0-9]+
 	// Therefore we can parse it directly without defensive checks
@@ -15,4 +18,13 @@ public class SharedUtility {
 
 	    return num;
 	} 
+	
+	public static boolean isValidNodeId(String nodeId){
+		return _nodeIdPattern.matcher(nodeId).find();
+	}
+	
+	private static Pattern _nodeIdPattern;
+	static {
+		_nodeIdPattern = Pattern.compile("^v[0-9]+$");
+	}
 }

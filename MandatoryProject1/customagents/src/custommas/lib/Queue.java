@@ -1,5 +1,6 @@
 package custommas.lib;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -21,6 +22,13 @@ public class Queue<Item> implements Iterable<Item> {
         first = null;
         last  = null;
         N = 0;
+    }
+    
+    public Queue(List<Item> fromList){
+    	this();
+    	for(Item i : fromList){
+    		enqueue(i);
+    	}
     }
 
     /**

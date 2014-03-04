@@ -30,7 +30,7 @@
     <agent name="agentA27" entity="connectionA27" class="massim.javaagents.agents.SimpleInspectorAgent" team="A"/>
     <agent name="agentA28" entity="connectionA28" class="massim.javaagents.agents.SimpleInspectorAgent" team="A"/>-->
     
-    <agent name="agentB1" entity="connectionB1" class="custommas.agents.ExplorerAgent" team="B"/>
+    <agent name="agentB1" entity="connectionB1" class="custommas.agents.SkippyAgent" team="B"/>
     <!--<agent name="agentB2" entity="connectionB2" class="massim.javaagents.agents.SimpleExplorerAgent" team="B"/>
     <agent name="agentB3" entity="connectionB3" class="massim.javaagents.agents.SimpleExplorerAgent" team="B"/>
     <agent name="agentB4" entity="connectionB4" class="massim.javaagents.agents.SimpleExplorerAgent" team="B"/>

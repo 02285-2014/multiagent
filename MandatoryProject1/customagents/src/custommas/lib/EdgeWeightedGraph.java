@@ -84,7 +84,7 @@ public class EdgeWeightedGraph extends Graph {
 		return node1.hashCode() <= node2.hashCode() ? node1 + node2 : node2 + node1;
 	}
 	
-	public Collection<String> getAllNodes() {
+	public Collection<String> getAllNodeIds() {
 		return _nodes.keySet();
 	}
 	
