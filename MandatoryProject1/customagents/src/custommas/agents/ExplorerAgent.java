@@ -201,6 +201,7 @@ public class ExplorerAgent extends CustomAgent{
 				position = p.getParameters().get(0).toString();
 				removeBeliefs("position");
 				addBelief(new LogicBelief("position", position));
+				println("Found my position to be: " + position);
 				continue;
 			}
 			
@@ -323,14 +324,14 @@ public class ExplorerAgent extends CustomAgent{
 	}
 	
 	private Action planNextUnprobed(String position, Node firstUnprobed) {
-		println("Trying to find unprobed node");
+		println("Trying to find unprobed node from position: " + position);
 		if(firstUnprobed != null){
 			Stack<Node> pathToUnprobed = _unprobedSearch.pathTo(firstUnprobed);
 			if(pathToUnprobed.size() > 1){
 				if(pathToUnprobed.peek().getId().equals(position)){
 					pathToUnprobed.pop();
 				}
-				println("Found unprobed node, can reach it by movin to " + pathToUnprobed.peek().getId());
+				println("Found unprobed node, can reach it by movin from " + position + " to " + pathToUnprobed.peek().getId());
 				return MarsUtil.gotoAction(pathToUnprobed.peek().getId());
 			}
 		}
