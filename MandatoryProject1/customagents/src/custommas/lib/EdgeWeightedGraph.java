@@ -83,4 +83,12 @@ public class EdgeWeightedGraph extends Graph {
 	public static String getEdgeId(String node1, String node2){
 		return node1.hashCode() <= node2.hashCode() ? node1 + node2 : node2 + node1;
 	}
+	
+	public Collection<String> getAllNodes() {
+		return _nodes.keySet();
+	}
+	
+	public Collection<String> getAllEdges() {
+		return _edges.keySet();
+	}
 }
