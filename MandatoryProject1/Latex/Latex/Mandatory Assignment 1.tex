@@ -24,7 +24,6 @@
 
 \pagestyle{fancy}
 
-
 \fancyhead[L]{\slshape\footnotesize March 11, 2014\\ ${}$\\\textsc{Artificial Intelligence and Multi-agent systems}}
 \fancyhead[R]{\slshape\footnotesize \textsc{Andreas Kjeldsen (s092638)}\\\textsc{Morten Eskesen (s133304)}\\\textsc{Peter Carlslund (s113998)}}
 \fancyfoot[C]{\thepage}
@@ -43,7 +42,6 @@
 
 \textsc{\Large 02285 Artificial Intelligence and Multi-agent Systems}\\[0.5cm]
 
-
 % Title
 \HRule \\[0.4cm]
 {\huge \bfseries Mandatory Assignment 1}\\[0.1cm]
@@ -61,7 +59,6 @@ Morten Chabert \textsc{Eskesen}\\
 \\[10pt]
 Peter \textsc{Carlslund}\\
 \emph{s113998@student.dtu.dk}
-
 
 \vfill
 
@@ -101,11 +98,15 @@ Our agent supports the following actions: {\tt Recharge, Probe, Survey, GoTo, Sk
 Which action to be chosen is checked for in the following hierarchical order: {\tt Recharge, Probe, Survey, GoTo, Skip}. This ensures that our agent gets recharged and that it does not move to another vertex without first gathering all possible information from the vertex it is currently positioned at.
 
 \subsection*{Path Planning}
-Text goes here...
+While mapping, our agent should be able to take instructions about where to go. When receiving an instruction, the agent uses Dijkstra's algorithm to plan the path to the goal vertex. \textbf{HEURISTIC SHIT HERE!}.\\
+\\
+While moving towards the goal vertex, new vertices and edges are still probed and surveyed. If the goal node has not been seen, the agent keep on mapping, but notifies when the goal node has been found.
 
 \section*{Results}
 Our agent is able to properly map an unknown environment, though as of right now we cannot make any guarantees regarding the time it takes to map the environment. When the environment has been mapped, our agent will recharge fully and then stand still until further instructions are send to it, this might not be the perfect way to behave, but we can disregard the opposing team for the moment and therefore an idle agent is okay.\\
 \\
-Something about the planning...
+Our agent is also able to plan a path to a specific node and follow the path afterwards. The heuristic used could possibly be improved by somehow transforming the graph into a real map with coordinates, that would allow us to use metric distances between vertices in our heuristics.\\
+\\
+We've been experiencing some unusual behavior when running our agent. Sometimes our agent would try to go to the same vertex it was already located at, this is because even though it's first {\tt GoTo} action was successful, the server does not indicate that in the response. We've determined that the server responses are one turn behind. We've been notified that we're not the only group experiencing this unusual behavior.
 
 \end{document}

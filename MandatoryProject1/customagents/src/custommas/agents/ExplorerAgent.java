@@ -76,10 +76,8 @@ public class ExplorerAgent extends CustomAgent{
 		}
 		String position = positionBeliefs.getFirst().getParameters().firstElement();
 		
-		//LinkedList<LogicBelief> neighbourBeliefs = getAllBeliefs("neighbor");
-		
 		// 3. probing if necessary (neighbour, probed, position)
-		act = planProbe(position/*, neighbourBeliefs*/);
+		act = planProbe(position);
 		if (act != null) return act;
 		
 		// 4. surveying if necessary (visibleEdge,surveyEdge,position)
@@ -94,6 +92,7 @@ public class ExplorerAgent extends CustomAgent{
 		if(_destinationGoals.size() > 0){
 			println("Trying to reach goal: " + _destinationGoals.peek());
 			if(_destinationGoals.peek().equals(currentNode.getId())){
+				// Goal reached
 				_pathToDestinationGoal = null;
 				_destinationGoals.dequeue();
 				_input.showGoalFound(currentNode.getId());
@@ -101,6 +100,7 @@ public class ExplorerAgent extends CustomAgent{
 				if(_pathToDestinationGoal == null){
 					Node goalNode = _graph.getNode(_destinationGoals.peek());
 					if(goalNode != null){
+						// New goal
 						_pathToDestinationGoal = Dijkstra.getPath(_graph, currentNode, goalNode);
 					}
 				}
@@ -135,7 +135,6 @@ public class ExplorerAgent extends CustomAgent{
 		}
 		
 		_unprobedSearch = new BreadthFirstExplorerSearch(_graph);
-		println("Build BFS");
 		moveToNode = _unprobedSearch.findClosestUnexploredNode(currentNode);
 		
 		if(moveToNode == null){
@@ -146,10 +145,6 @@ public class ExplorerAgent extends CustomAgent{
 		// 5. Find closest unprobed node
 		act = planNextUnprobed(position, moveToNode);
 		if(act != null) return act;
-		
-		// 6. (almost) random walking
-		act = planRandomWalk(currentNode);
-		if (act != null) return act;
 		
 		
 		return hasMaxEnergy() ? MarsUtil.skipAction() : MarsUtil.rechargeAction();
@@ -343,7 +338,7 @@ public class ExplorerAgent extends CustomAgent{
 		}
 	}
 	
-	private Action planProbe(String position/*, LinkedList<LogicBelief> neighbours*/) {
+	private Action planProbe(String position) {
 		// probe current position if not known
 		boolean probed = false;
 		LinkedList<LogicBelief> vertices = getAllBeliefs("probedVertex");
@@ -427,14 +422,5 @@ public class ExplorerAgent extends CustomAgent{
 		
 		println("Couldn't find an unprobed node");
 		return null;
-	}
-	
-	private Action planRandomWalk(Node currentNode) {
-		println("Trying to find random node to walk to");
-		List<Node> neighbours = new ArrayList<Node>(_graph.getAdjacentTo(currentNode));
-		println("Found neighbours, will shuffle");
-		Collections.shuffle(neighbours);
-		println("I will go to " + neighbours.get(0).getId());
-		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
 }

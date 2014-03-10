@@ -1,9 +1,13 @@
 package custommas.agents;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import custommas.lib.EdgeWeightedGraph;
+import custommas.lib.Node;
 
 import apltk.interpreter.data.LogicBelief;
 import apltk.interpreter.data.LogicGoal;
@@ -85,6 +89,16 @@ public abstract class CustomAgent extends Agent {
 		}
 		
 		return null;
+	}
+	
+	protected Action planRandomWalk(Node currentNode) {
+		println("Trying to find random node to walk to");
+		List<Node> neighbours = new ArrayList<Node>(_graph.getAdjacentTo(currentNode));
+		if(neighbours == null || neighbours.size() < 1) return null;
+		println("Found neighbours, will shuffle");
+		Collections.shuffle(neighbours);
+		println("I will go to " + neighbours.get(0).getId());
+		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
 	
 	public String getVariable(String variable) {
