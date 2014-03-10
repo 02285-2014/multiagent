@@ -98,7 +98,7 @@ Our agent supports the following actions: {\tt Recharge, Probe, Survey, GoTo, Sk
 Which action to be chosen is checked for in the following hierarchical order: {\tt Recharge, Probe, Survey, GoTo, Skip}. This ensures that our agent gets recharged and that it does not move to another vertex without first gathering all possible information from the vertex it is currently positioned at.
 
 \subsection*{Path Planning}
-While mapping, our agent should be able to take instructions about where to go. When receiving an instruction, the agent uses Dijkstra's algorithm to plan the path to the goal vertex. \textbf{HEURISTIC SHIT HERE!}.\\
+While mapping, our agent should be able to take instructions about where to go. When receiving an instruction, the agent uses Dijkstra's algorithm to plan the path to the goal vertex. Dijkstra is an uninformed algorithm. It should be used when there is no knowledge of the graph and it is not possible to estimate the distance from each node to the target.\\
 \\
 While moving towards the goal vertex, new vertices and edges are still probed and surveyed. If the goal node has not been seen, the agent keep on mapping, but notifies when the goal node has been found.
 
