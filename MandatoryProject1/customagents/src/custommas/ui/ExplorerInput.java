@@ -1,15 +1,14 @@
 package custommas.ui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+// Do not know Swing, code is more or less taken from Oracles tutorials
 
 public class ExplorerInput {
 	private String _agentName; 

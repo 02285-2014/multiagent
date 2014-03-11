@@ -1,11 +1,11 @@
 package custommas.common;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SharedUtility {
 	// We believe node IDs are consistent with their syntax: s[0-9]+
 	// Therefore we can parse it directly without defensive checks
+	// Not in use any longer, but might be something we could use later
 	public static int parseNodeId(final String nodeId ){
 	    int num  = 0;
 	    final int len  = nodeId.length();

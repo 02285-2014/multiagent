@@ -7,7 +7,6 @@ import custommas.lib.*;
 public class Dijkstra {
 	private static final int maxDistance = Integer.MAX_VALUE; 
 	private static Set<String> nodes;
-	private static Map<String, Integer> distance;
 	private static PriorityQueue<DijkstraVertex> pq;
 	private static Map<String, DijkstraVertex> vertices;
 	

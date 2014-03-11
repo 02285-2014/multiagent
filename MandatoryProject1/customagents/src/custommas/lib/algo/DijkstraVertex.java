@@ -35,6 +35,5 @@ public class DijkstraVertex implements Comparable<DijkstraVertex> {
 	
 	public int compareTo(DijkstraVertex v) {
 		return Integer.compare(getDistance(), v.getDistance());
-	}
-	
+	}	
 }

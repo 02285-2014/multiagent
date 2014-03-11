@@ -82,7 +82,6 @@ public abstract class CustomAgent extends Agent {
 				return MarsUtil.rechargeAction();
 			}
 		}else if(energy < maxEnergy * threshold){
-			// TODO: Optimize to beAtHalfCharge and then restore full power
 			println("I need to recharge");
 			goals.add(new LogicGoal("beAtFullCharge"));
 			return MarsUtil.rechargeAction();

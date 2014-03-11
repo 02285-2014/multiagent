@@ -1,12 +1,9 @@
 package custommas.agents;
 
 import eis.iilang.Action;
-import eis.iilang.Percept;
-import massim.javaagents.Agent;
 import massim.javaagents.agents.MarsUtil;
 
 public class SkippyAgent extends CustomAgent {
-
 	public SkippyAgent(String name, String team) {
 		super(name, team);
 	}
@@ -20,5 +17,4 @@ public class SkippyAgent extends CustomAgent {
 	protected void handlePercepts() {
 		return;
 	}
-
 }

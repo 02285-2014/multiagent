@@ -3,121 +3,91 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-
-public class Queue<Item> implements Iterable<Item> {
+// Source: Algorithms 4th Edition, Sedgewick & Wayne
+public class Queue<T> implements Iterable<T> {
     private int N;               // number of elements on queue
-    private Node<Item> first;    // beginning of queue
-    private Node<Item> last;     // end of queue
+    private Node<T> first;    // beginning of queue
+    private Node<T> last;     // end of queue
 
     // helper linked list class
-    private static class Node<Item> {
-        private Item item;
-        private Node<Item> next;
+    private static class Node<T> {
+        private T item;
+        private Node<T> next;
     }
 
-    /**
-     * Initializes an empty queue.
-     */
     public Queue() {
         first = null;
         last  = null;
         N = 0;
     }
     
-    public Queue(List<Item> fromList){
+    public Queue(List<T> fromList){
     	this();
-    	for(Item i : fromList){
+    	for(T i : fromList){
     		enqueue(i);
     	}
     }
 
-    /**
-     * Is this queue empty?
-     * @return true if this queue is empty; false otherwise
-     */
     public boolean isEmpty() {
         return first == null;
     }
 
-    /**
-     * Returns the number of items in this queue.
-     * @return the number of items in this queue
-     */
     public int size() {
         return N;     
     }
 
-    /**
-     * Returns the item least recently added to this queue.
-     * @return the item least recently added to this queue
-     * @throws java.util.NoSuchElementException if this queue is empty
-     */
-    public Item peek() {
+    public T peek() {
         if (isEmpty()) throw new NoSuchElementException("Queue underflow");
         return first.item;
     }
 
-    /**
-     * Adds the item to this queue.
-     * @param item the item to add
-     */
-    public void enqueue(Item item) {
-        Node<Item> oldlast = last;
-        last = new Node<Item>();
+    public void enqueue(T item) {
+        Node<T> oldlast = last;
+        last = new Node<T>();
         last.item = item;
         last.next = null;
-        if (isEmpty()) first = last;
-        else           oldlast.next = last;
+        if (isEmpty()){
+        	first = last;
+        } else{
+        	oldlast.next = last;
+        }
         N++;
     }
 
-    /**
-     * Removes and returns the item on this queue that was least recently added.
-     * @return the item on this queue that was least recently added
-     * @throws java.util.NoSuchElementException if this queue is empty
-     */
-    public Item dequeue() {
+    public T dequeue() {
         if (isEmpty()) throw new NoSuchElementException("Queue underflow");
-        Item item = first.item;
+        T item = first.item;
         first = first.next;
         N--;
         if (isEmpty()) last = null;   // to avoid loitering
         return item;
     }
 
-    /**
-     * Returns a string representation of this queue.
-     * @return the sequence of items in FIFO order, separated by spaces
-     */
     public String toString() {
         StringBuilder s = new StringBuilder();
-        for (Item item : this)
+        for (T item : this)
             s.append(item + " ");
         return s.toString();
     } 
 
-    /**
-     * Returns an iterator that iterates over the items in this queue in FIFO order.
-     * @return an iterator that iterates over the items in this queue in FIFO order
-     */
-    public Iterator<Item> iterator()  {
-        return new ListIterator<Item>(first);  
+    public Iterator<T> iterator()  {
+        return new ListIterator<T>(first);  
     }
 
     // an iterator, doesn't implement remove() since it's optional
-    private class ListIterator<Item> implements Iterator<Item> {
-        private Node<Item> current;
+    private class ListIterator<TI> implements Iterator<TI> {
+        private Node<TI> current;
 
-        public ListIterator(Node<Item> first) {
+        public ListIterator(Node<TI> first) {
             current = first;
         }
 
         public boolean hasNext()  { return current != null;                     }
         public void remove()      { throw new UnsupportedOperationException();  }
 
-        public Item next() {
+        public TI next() {
             if (!hasNext()) throw new NoSuchElementException();
-            Item item = current.item;
+            TI item = current.item;
             current = current.next; 
             return item;
         }
