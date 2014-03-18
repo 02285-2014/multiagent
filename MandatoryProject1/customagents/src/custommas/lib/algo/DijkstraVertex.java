@@ -3,26 +3,36 @@ package custommas.lib.algo;
 
 public class DijkstraVertex implements Comparable<DijkstraVertex> {
 	private String id;
-	private int distance;
+	private double distance;
 	private DijkstraVertex previous;
+	private int step;
 	
-	public DijkstraVertex(String id, int distance) {
+	public DijkstraVertex(String id, double distance) {
 		this.id = id;
 		this.distance = distance;
 		this.previous = null;
+		step = -1;
 	}
 	
 	public String getId() {
 		return id;
 	}
 	
-	public int setDistance(int dist) {
+	public double setDistance(double dist) {
 		this.distance = dist;
 		return distance;
 	}
 	
-	public int getDistance() {
+	public double getDistance() {
 		return distance;
+	}
+	
+	public int getStep() {
+		return step;
+	}
+	
+	public void setStep(int step) {
+		this.step = step;
 	}
 	
 	public DijkstraVertex getPrevious() {
@@ -34,7 +44,7 @@ public class DijkstraVertex implements Comparable<DijkstraVertex> {
 	}
 	
 	public int compareTo(DijkstraVertex v) {
-		return Integer.compare(getDistance(), v.getDistance());
+		return Double.compare(getDistance(), v.getDistance());
 	}
 	
 }
