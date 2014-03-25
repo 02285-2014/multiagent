@@ -6,6 +6,7 @@ public class Node {
 	private int value;
 	private int index;
 	private int lowlink;
+	private boolean flag = false;
 	
 	public Node(String name) {
 		this.id = name;
@@ -41,6 +42,18 @@ public class Node {
 	
 	public int getLowLink() {
 		return lowlink;
+	}
+	
+	public void flag() {
+		flag = true;
+	}
+	
+	public void unFlag() {
+		flag = false;
+	}
+	
+	public boolean isFlagged() {
+		return flag;
 	}
 	
 	public void setLowLink(int newLowLink) {

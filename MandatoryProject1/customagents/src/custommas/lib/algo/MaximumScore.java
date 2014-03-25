@@ -34,6 +34,7 @@ public class MaximumScore {
 		for(Node n : g.getAllNodes()) {
 			n.setIndex(Integer.MAX_VALUE);
 			n.setLowLink(Integer.MAX_VALUE);
+			n.unFlag();
 		}
 		
 		return sccToReturn;
@@ -63,12 +64,13 @@ public class MaximumScore {
 		index++;
 		
 		nodes.push(n);
+		n.flag();
 		
 		for(Node v : g.getAdjacentTo(n)) {
 			if(v.getIndex() == Integer.MAX_VALUE) {
 				StrongConnect(g,v);
 				n.setLowLink(Math.min(n.getLowLink(), v.getLowLink()));
-			} else if(nodes.contains(v)) {
+			} else if(v.isFlagged()) { //nodes.contains(v)
 				n.setLowLink(Math.min(n.getLowLink(),v.getIndex()));
 			}
 		}
