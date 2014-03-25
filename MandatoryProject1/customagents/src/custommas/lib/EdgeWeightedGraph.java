@@ -88,7 +88,15 @@ public class EdgeWeightedGraph extends Graph {
 		return _nodes.keySet();
 	}
 	
-	public Collection<String> getAllEdges() {
+	public Collection<Node> getAllNodes() {
+		return _nodes.values();
+	}
+	
+	public Collection<String> getAllEdgeIds() {
 		return _edges.keySet();
+	}
+	
+	public Collection<Edge> getAllEdges() {
+		return _edges.values();
 	}
 }

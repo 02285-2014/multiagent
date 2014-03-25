@@ -4,10 +4,14 @@ public class Node {
 	private static final int NonProbed = Integer.MIN_VALUE;
 	private String id;
 	private int value;
+	private int index;
+	private int lowlink;
 	
 	public Node(String name) {
 		this.id = name;
 		this.value = NonProbed;
+		this.index = Integer.MAX_VALUE;
+		this.lowlink = Integer.MAX_VALUE;
 	}
 	
 	public Node(String name, int value) {
@@ -25,6 +29,22 @@ public class Node {
 	
 	public void setValue(int newValue) {
 		this.value = newValue;
+	}
+	
+	public void setIndex(int newIndex) {
+		this.index = newIndex;
+	}
+	
+	public int getIndex() {
+		return index;
+	}
+	
+	public int getLowLink() {
+		return lowlink;
+	}
+	
+	public void setLowLink(int newLowLink) {
+		this.lowlink = newLowLink;
 	}
 	
 	public boolean isProbed(){
