@@ -2,33 +2,39 @@ package custommas.lib;
 
 public class Node {
 	private static final int NonProbed = Integer.MIN_VALUE;
-	private String id;
-	private int value;
+	private String _id;
+	private String _owner;
+	private int _value;
 	
 	public Node(String name) {
-		this.id = name;
-		this.value = NonProbed;
+		if(name == null) throw new NullPointerException("Name cannot be null");
+		_id = name;
+		_value = NonProbed;
 	}
 	
 	public Node(String name, int value) {
 		this(name);
-		this.value = value;;
+		_value = value;;
 	}
 	
 	public String getId() {
-		return id;
+		return _id;
 	}
 	
 	public int getValue() {
-		return value;
+		return _value;
 	}
 	
 	public void setValue(int newValue) {
-		this.value = newValue;
+		_value = newValue;
+	}
+	
+	public void setOwner(String owner){
+		_owner = owner;
 	}
 	
 	public boolean isProbed(){
-		return this.value != NonProbed;
+		return _value != NonProbed;
 	}
 	
 	@Override
@@ -38,11 +44,11 @@ public class Node {
 	
 	@Override
 	public int hashCode(){
-		return id.hashCode();
+		return _id.hashCode();
 	}
 	
 	@Override
 	public String toString(){
-		return "Node(" + id + ")";
+		return "Node(" + _id + ")";
 	}
 }

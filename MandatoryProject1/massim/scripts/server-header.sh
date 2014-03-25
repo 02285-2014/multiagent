@@ -14,11 +14,11 @@ conf=conf/
 
 function runServer {
 # test if script runs in a screen else start a new one (if the command screen exists)
-if [ -z "$STY" -a -n $( type -P screen ) ]
-then
-	echo "Start new screen"
-	screen ./$(basename $0)
-else
+#if [ -z "$STY" -a -n $( type -P screen ) ]
+#then
+#	echo "Start new screen"
+	#screen ./$(basename $0)
+#else
 	if [ $resultPage != false ]
 	then
 		# move old result page
@@ -81,5 +81,5 @@ else
 			sleep 10
 		fi
 	done	
-fi
+#fi
 }

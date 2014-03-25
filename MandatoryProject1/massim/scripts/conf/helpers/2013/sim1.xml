@@ -8,7 +8,9 @@
 				gradientWeight = "0"
 				optimaWeight = "100"
 				blurIterations = "8"
-				optimaPercentage = "5">
+				optimaPercentage = "5"
+				randomSeed = "1337"
+				maxNumberOfSteps = "500">
 			
 			&actions;
 			&roles;	

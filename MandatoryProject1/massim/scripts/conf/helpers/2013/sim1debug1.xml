@@ -4,8 +4,8 @@
 			<configuration
 				minNodeWeight="0"
 				maxNodeWeight="0"
-				minEdgeCost="1"
-				maxEdgeCost="10"
+				minEdgeCost="0"
+				maxEdgeCost="1"
 				thinning="20"
 				numberOfNodes="400"
 				randomWeight = "0"

@@ -4,7 +4,7 @@
 <conf>
 	&sim-server;
 	<match>
-		&simulation1debug1;
+		&simulation1;
 	</match>
 	
 	<accounts>

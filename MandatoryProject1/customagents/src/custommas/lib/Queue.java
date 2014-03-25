@@ -62,6 +62,12 @@ public class Queue<T> implements Iterable<T> {
         if (isEmpty()) last = null;   // to avoid loitering
         return item;
     }
+    
+    public void clear(){
+    	first = null;
+        last  = null;
+        N = 0;
+    }
 
     public String toString() {
         StringBuilder s = new StringBuilder();

@@ -1,5 +1,6 @@
 package custommas.lib.algo;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -7,6 +8,7 @@ import custommas.lib.Graph;
 import custommas.lib.Node;
 import custommas.lib.Queue;
 import custommas.lib.Stack;
+import custommas.lib.interfaces.INodePredicate;
 
 public class BreadthFirstExplorerSearch {
     private HashSet<Node> marked; // marked[v] = is there an s-v path
@@ -18,22 +20,41 @@ public class BreadthFirstExplorerSearch {
     }
     
     public Node findClosestUnexploredNode(Node startNode){
+    	return findClosestUnexploredNodeUsingPredicate(startNode, new INodePredicate(){
+    		public boolean evaluate(Node node, int comparableValue){
+    			return !node.isProbed();
+    		}
+    	});
+    }
+    
+    public Node findClosestUnexploredNodeUsingPredicate(Node startNode, INodePredicate predicate){
     	marked = new HashSet<Node>();
         edgeTo = new HashMap<Node, Node>();
         marked.add(startNode);
         
-        if(!startNode.isProbed()) return startNode;
+        int currentDepth = 0; 
+        int elementsToDepthIncrease = 1;
+        int nextElementsToDepthIncrease = 0;
+        
+        if(predicate.evaluate(startNode, currentDepth)) return startNode;
     	Queue<Node> q = new Queue<Node>();
         q.enqueue(startNode);
 
         while (!q.isEmpty()) {
             Node v = q.dequeue();
-            for (Node w : graph.getAdjacentTo(v)) {
+            Collection<Node> adjacent = graph.getAdjacentTo(v);
+            nextElementsToDepthIncrease += adjacent.size();
+            for (Node w : adjacent) {
+            	if(--elementsToDepthIncrease < 1){
+            		currentDepth++;
+            		elementsToDepthIncrease = nextElementsToDepthIncrease;
+            		nextElementsToDepthIncrease = 0;
+            	}
                 if (!marked.contains(w)) {
                 	edgeTo.put(w, v);
                 	marked.add(w);
                     q.enqueue(w);
-                	if(!w.isProbed()) return w;
+                	if(predicate.evaluate(w, currentDepth)) return w;
                 }
             }
         }

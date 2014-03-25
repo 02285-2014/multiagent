@@ -1,11 +1,16 @@
 package custommas.agents;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import custommas.common.ActionSchedule;
+import custommas.common.SharedUtil;
+import custommas.common.TeamIntel;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
 
@@ -13,21 +18,54 @@ import apltk.interpreter.data.LogicBelief;
 import apltk.interpreter.data.LogicGoal;
 import apltk.interpreter.data.Message;
 import eis.iilang.Action;
+import eis.iilang.Identifier;
+import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import massim.javaagents.Agent;
 import massim.javaagents.agents.MarsUtil;
 
 public abstract class CustomAgent extends Agent {
+	protected int _internalUniqueId;
 	protected String _name;
 	protected String _team;
+	protected String _position;
+	protected int _health;
+	protected int _maxHealth;
+	protected int _energy;
+	protected int _maxEnergy;
+	protected int _money;
 	
+	protected Action _actionNow;
+	protected Action _actionNext;
+	
+	protected static final HashSet<String> validMessages;
+	protected static final HashSet<String> validPercepts;
+	protected static final HashSet<String> validActionShouts;
+	
+	static {
+		validMessages = SharedUtil.newHashSetFromArray(new String[] {
+			"visibleVertex", "visibleEdge", "probedVertex", "surveyedEdge", "position"
+		});
+		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
+			"visibleVertex", "visibleEdge", "probedVertex", "surveyedEdge",
+			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement"
+		});
+		validActionShouts = SharedUtil.newHashSetFromArray(new String[] {
+			SharedUtil.Actions.GoTo, SharedUtil.Actions.Custom.GoToAndProbe, 
+			SharedUtil.Actions.Probe, SharedUtil.Actions.Survey
+		});
+	}
+	
+	protected ActionSchedule _actionSchedule;
 	protected EdgeWeightedGraph _graph;
 	
 	public CustomAgent(String name, String team) {
 		super(name, team);
+		_internalUniqueId = SharedUtil.getUnassignedAgentId();
 		_name = name;
 		_team = team;
 		_graph = new EdgeWeightedGraph();
+		_actionSchedule = new ActionSchedule();
 	}
 
 	@Override
@@ -37,42 +75,51 @@ public abstract class CustomAgent extends Agent {
 
 	@Override
 	public Action step() {
-		handleMessages();
-		handlePercepts();
-		return nextAction();
-	}
-	
-	protected abstract Action nextAction();
-	
-	/* Taken from example source */
-	protected void handleMessages() {
-		// handle messages... believe everything the others say
-		Collection<Message> messages = getMessages();
-		for ( Message msg : messages ) {
-			println(msg.sender + " told me " + msg.value);
-			String predicate = ((LogicBelief)msg.value).getPredicate();
-			if ( containsBelief((LogicBelief)msg.value) ) {
-				println("I already knew that");
-			}
-			else {
-				println("that was new to me");
-				if( predicate.equals("probedVertex") || predicate.equals("surveyedEdge") ) {
-					addBelief((LogicBelief)msg.value);
-					println("I will keep that in mind");
-					continue;
+		_actionSchedule.clear();
+		List<TeamIntel> intel = new LinkedList<TeamIntel>();
+		for(Message message : getMessages()){
+			TeamIntel mIntel = new TeamIntel(message);
+			
+			println("Got message intel with name: " + mIntel.getName());
+			if(mIntel.getName().equals("nextAgentAction")){
+				if(mIntel.getParameters().length > 0 && validActionShouts.contains(mIntel.getParameters()[0])){
+					println("Got nextAgentAction: " + Arrays.toString(mIntel.getParameters()));
+					_actionSchedule.add(mIntel);
 				}
-				println("but I am not interested in that gibberish");
+			}else{
+				intel.add(mIntel);
 			}
 		}
+		
+		for(Percept percept : getAllPercepts()){
+			intel.add(new TeamIntel(percept));
+		}
+		
+		println("[ACTION SCHEDULE]");
+		println(_actionSchedule.toString());
+		
+		handleIntel(intel);
+		
+		planActions();
+		if(_actionNext != null && validActionShouts.contains(_actionNext.getName())){
+			println("Trying to make special: " + _actionNext.getName());
+			LogicBelief b = actionToBelief(_actionNext);
+			if(b != null){
+				println("[SPECIAL] Broadcasting next action: " + b.getParameters());
+				broadcastBelief(b);
+			}
+		}
+		return _actionNow;
 	}
 	
-	protected abstract void handlePercepts();
+	protected abstract void handleIntel(List<TeamIntel> intelList);
+	protected abstract void planActions();
 	
 	protected Action planRecharge(double threshold){
-		int energy = getEnergy();
-		int maxEnergy = getMaxEnergy();
+		int energy = _energy;
+		int maxEnergy = _maxEnergy;
 		
-		// if has the goal of being recharged...
+		// if agent has the goal of being recharged...
 		if (goals.contains(new LogicGoal("beAtFullCharge"))) {
 			if (maxEnergy == energy) {
 				println("I can stop recharging. I am at full charge");
@@ -100,42 +147,101 @@ public abstract class CustomAgent extends Agent {
 		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
 	
-	public String getVariable(String variable) {
-		LinkedList<LogicBelief> beliefs = getAllBeliefs(variable);
-		if(beliefs.isEmpty()) return null;
-		return beliefs.getFirst().getParameters().get(0);
-	}
-	
-	public int getVariableAsInt(String variable, int fallbackValue){
-		String var = getVariable(variable);
-		return var != null ? Integer.parseInt(var) : fallbackValue;
-	}
-	
-	public int getEnergy(){
-		return getVariableAsInt("energy", 0);
+	/*public int getEnergy(){
+		return _energy;
 	}
 	
 	public int getMaxEnergy(){
-		return getVariableAsInt("maxEnergy", 0);
-	}
+		return _maxEnergy;
+	}*/
 	
 	public boolean hasMaxEnergy(){
-		return getEnergy() == getMaxEnergy();
+		return _energy == _maxEnergy;
 	}
 	
-	public String getPosition() {
-		return getVariable("position");
-	}
-	
-	public String getRole() {
-		return getVariable("role");
-	}
-	
-	public boolean isDisabled() {
-		return getVariable("disabled") == null;
+	/*public String getPosition() {
+		return _position;
 	}
 	
 	public int getHealth() {
-		return getVariableAsInt("health", 0);
+		return _health;
+	}
+	
+	public int getMaxHealth(){
+		return _maxHealth;
+	}*/
+	
+	private LogicBelief actionToBelief(Action action){
+		if(action != null){
+			Collection<String> pars = new LinkedList<String>();
+			if(action instanceof ProbeAction){
+				pars.add(SharedUtil.Actions.Probe);
+				pars.add(((ProbeAction)action).getNodeId());
+				pars.add("" + _internalUniqueId);
+			}else if(action instanceof SurveyAction){
+				pars.add(SharedUtil.Actions.Survey);
+				pars.add(((SurveyAction)action).getNodeId());
+				pars.add("" + _internalUniqueId);
+			}else if(action instanceof GotoAndProbeAction){
+				pars.add(SharedUtil.Actions.Custom.GoToAndProbe);
+				pars.add(((GotoAndProbeAction)action).getNodeId());
+				pars.add("" + ((GotoAndProbeAction)action).getSteps());
+			}
+			
+			if(pars.size() > 0){
+				return new LogicBelief("nextAgentAction", pars);
+			}
+		}
+		return null;
+	}
+	
+	protected class ProbeAction extends Action {
+		private String _nodeId;
+		
+		public ProbeAction(String nodeId) {
+			super(SharedUtil.Actions.Probe);
+			_nodeId = nodeId;
+		}
+		
+		public String getNodeId(){
+			return _nodeId;
+		}
+	}
+	
+	protected class SurveyAction extends Action {
+		private String _nodeId;
+		
+		public SurveyAction(String nodeId) {
+			super(SharedUtil.Actions.Survey);
+			_nodeId = nodeId;
+		}
+		
+		public String getNodeId(){
+			return _nodeId;
+		}
+	}
+	
+	protected class GotoAction extends Action {
+		private String _nodeId;
+		private int _steps;
+		
+		public GotoAction(String nodeId, int steps) {
+			super(SharedUtil.Actions.GoTo, new Identifier(nodeId));
+			_nodeId = nodeId;
+		}
+		
+		public String getNodeId(){
+			return _nodeId;
+		}
+		
+		public int getSteps(){
+			return _steps;
+		}
+	}
+	
+	protected class GotoAndProbeAction extends GotoAction {
+		public GotoAndProbeAction(String nodeId, int steps) {
+			super(nodeId, steps);
+		}		
 	}
 }

@@ -2,14 +2,14 @@
 <interfaceConfig scenario="mars2013" host="localhost" port="12300" scheduling="yes" times="no" notifications="no" queued="no" statisticsFile="no" statisticsShell="no" submitStatistic="no">
   <entities>
     <entity name="connectionA1" username="a1" password="1" iilang="yes" xml="yes"/>
-    <!--<entity name="connectionA2" username="a2" password="1" iilang="yes" xml="yes"/>
+    <entity name="connectionA2" username="a2" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA3" username="a3" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA4" username="a4" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA5" username="a5" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA6" username="a6" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA7" username="a7" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA8" username="a8" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionA9" username="a9" password="1" iilang="yes" xml="yes"/>
+    <!--<entity name="connectionA9" username="a9" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA10" username="a10" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA11" username="a11" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA12" username="a12" password="1" iilang="yes" xml="yes"/>
@@ -30,15 +30,15 @@
     <entity name="connectionA27" username="a27" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionA28" username="a28" password="1" iilang="yes" xml="yes"/>-->
     
-    <entity name="connectionB1" username="b1" password="1" iilang="yes" xml="yes"/>
-    <!--<entity name="connectionB2" username="b2" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB3" username="b3" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB4" username="b4" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB5" username="b5" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB6" username="b6" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB7" username="b7" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB8" username="b8" password="1" iilang="yes" xml="yes"/>
-    <entity name="connectionB9" username="b9" password="1" iilang="yes" xml="yes"/>
+    <entity name="connectionB1" username="b1" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB2" username="b2" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB3" username="b3" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB4" username="b4" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB5" username="b5" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB6" username="b6" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB7" username="b7" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB8" username="b8" password="1" iilang="yes" xml="no"/>
+    <!--<entity name="connectionB9" username="b9" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionB10" username="b10" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionB11" username="b11" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionB12" username="b12" password="1" iilang="yes" xml="yes"/>

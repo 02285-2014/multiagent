@@ -57,7 +57,7 @@
 >
 	
 <!ATTLIST configuration
-	maxNumberOfSteps CDATA "7500"
+	maxNumberOfSteps CDATA "750"
 	xmlns:meta CDATA "http://www.tu-clausthal.de/"
 	numberOfAgents CDATA "56"
 	numberOfTeams CDATA "2"
