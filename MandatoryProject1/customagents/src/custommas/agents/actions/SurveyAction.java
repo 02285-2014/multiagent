@@ -3,6 +3,7 @@ package custommas.agents.actions;
 import custommas.common.SharedUtil;
 import eis.iilang.Action;
 
+@SuppressWarnings("serial")
 public class SurveyAction  extends Action {
 	private String _nodeId;
 	

@@ -4,6 +4,7 @@ import custommas.common.SharedUtil;
 import eis.iilang.Action;
 import eis.iilang.Identifier;
 
+@SuppressWarnings("serial")
 public class GotoAction  extends Action {
 	private String _nodeId;
 	private int _steps;

@@ -39,6 +39,7 @@ public class TeamIntel {
 		_typeIs = TypeIsMessage;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public TeamIntel(Percept percept){
 		_name = percept.getName();
 		List<Parameter> pars = percept.getParameters();

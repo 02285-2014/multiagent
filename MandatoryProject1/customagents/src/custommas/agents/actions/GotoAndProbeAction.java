@@ -1,5 +1,6 @@
 package custommas.agents.actions;
 
+@SuppressWarnings("serial")
 public class GotoAndProbeAction extends GotoAction {
 	private String _goalNodeId;
 	

@@ -1,14 +1,11 @@
 package custommas.agents;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import custommas.common.ActionSchedule;
 import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedUtil;
@@ -16,18 +13,13 @@ import custommas.common.TeamIntel;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
 
-import apltk.interpreter.data.LogicBelief;
 import apltk.interpreter.data.LogicGoal;
-import apltk.interpreter.data.Message;
 import eis.iilang.Action;
-import eis.iilang.Identifier;
-import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import massim.javaagents.Agent;
 import massim.javaagents.agents.MarsUtil;
 
 public abstract class CustomAgent extends Agent {
-	protected int _internalUniqueId;
 	protected String _name;
 	protected String _team;
 	protected String _position;
@@ -43,7 +35,6 @@ public abstract class CustomAgent extends Agent {
 	
 	protected static final HashSet<String> validMessages;
 	protected static final HashSet<String> validPercepts;
-	protected static final HashSet<String> validActionShouts;
 	
 	static {
 		validMessages = SharedUtil.newHashSetFromArray(new String[] {
@@ -53,17 +44,12 @@ public abstract class CustomAgent extends Agent {
 			"visibleVertex", "visibleEdge", "probedVertex", "surveyedEdge",
 			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement"
 		});
-		validActionShouts = SharedUtil.newHashSetFromArray(new String[] {
-			SharedUtil.Actions.GoTo, SharedUtil.Actions.Custom.GoToAndProbe, 
-			SharedUtil.Actions.Probe, SharedUtil.Actions.Survey
-		});
 	}
 	
 	protected EdgeWeightedGraph _graph;
 	
 	public CustomAgent(String name, String team) {
 		super(name, team);
-		_internalUniqueId = SharedUtil.getUnassignedAgentId();
 		_name = name;
 		_team = team;
 		_graph = new EdgeWeightedGraph();
@@ -78,7 +64,6 @@ public abstract class CustomAgent extends Agent {
 	public Action step() {
 		_actionNow = null;
 		_actionRound = 0;
-		//_stepRound = PlanningCenter.getStep();
 		
 		List<TeamIntel> intel = new LinkedList<TeamIntel>();
 		TeamIntel[] messages = MessageCenter.getMessages(this);
@@ -91,45 +76,20 @@ public abstract class CustomAgent extends Agent {
 			intel.add(new TeamIntel(percept));
 		}
 		
-		//println("Noted all my percepts");
-		
 		handleIntel(intel);
-		
-		//println("Handled all my intel");
-		
-		pingForNewAction();
-		
-		/*println("Started ping for action");
-		
-		while(!PlanningCenter.donePlanning()){
-			try {
-				if(_actionNow != null){
-					println("Waiting for PC! My action: " + _actionNow);
-				}else{
-					println("No action planned for me!");
-				}
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				println("Something went wrong waiting for planning, I'll just do as I planned to");
-				break;
-			}
-		}*/
+		planNewAction();
 		
 		return _actionNow;
 	}
 	
-	public void pingForNewAction(/*int syncStep*/){
-		/*if(syncStep < _stepRound){
-			println("[OUT_OF_SYNC]");
-			return;
-		}*/
+	public void planNewAction(){
 		planAction();
 		if(_actionNow != null){
 			println("Planning my action: " + _actionNow);
 		}else{
 			println("Couldn't find any action!");
 		}
-		PlanningCenter.planAction(this, _actionNow/*, syncStep*/);
+		PlanningCenter.planAction(this, _actionNow);
 	}
 	
 	protected abstract void handleIntel(List<TeamIntel> intelList);

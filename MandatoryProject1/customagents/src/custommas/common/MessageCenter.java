@@ -16,10 +16,7 @@ public class MessageCenter {
 			_agentIndex.put(agent.getName(), index);
 		}
 		
-		int newMessages;
-		synchronized(_messages){
-			newMessages = _messages.size() - index;
-		}
+		int newMessages = _messages.size() - index;
 		
 		if(newMessages < 1){
 			return new TeamIntel[]{};
@@ -41,9 +38,7 @@ public class MessageCenter {
 			_agentIndex.put(agent.getName(), index);
 		}
 		
-		synchronized(_messages){
-			return _messages.size() - index;
-		}
+		return _messages.size() - index;
 	}
 	
 	public static boolean unreadMessages(Agent agent){
@@ -51,9 +46,7 @@ public class MessageCenter {
 	}
 	
 	public static void broadcastMessage(TeamIntel message){
-		synchronized(_messages){
-			_messages.add(message);
-		}
+		_messages.add(message);
 	}
 	
 	public static int totalMessages(){

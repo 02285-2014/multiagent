@@ -33,6 +33,10 @@ public class Node {
 		_owner = owner;
 	}
 	
+	public String getOwner(){
+		return _owner;
+	}
+	
 	public boolean isProbed(){
 		return _value != NonProbed;
 	}
