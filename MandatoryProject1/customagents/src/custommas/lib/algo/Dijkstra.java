@@ -22,6 +22,7 @@ public class Dijkstra {
 		HashSet<String> visited = new HashSet<String>();
 
 		DijkstraVertex v = new DijkstraVertex(initial.getId(), 0);
+		v.setStep(0);
 		pq.add(v);
 		vertices.put(initial.getId(), v);
 		
@@ -36,14 +37,25 @@ public class Dijkstra {
 		while (!pq.isEmpty()) {
 		    DijkstraVertex u = pq.poll();
 		    visited.add(u.getId());
+		    if(visited.contains(goal.getId())) {
+		    	break;
+		    }
 		    for(Node n : g.getAdjacentTo(g.getNode(u.getId()))) {
 		    	if(visited.contains(n.getId())) continue;
 		    	Edge e = g.getEdgeFromNodes(g.getNode(u.getId()), n);
 		    	int weight = e.getWeight();
-		    	int distanceThroughU = u.setDistance(u.getDistance() + weight);
+		    	
+		    	int step = u.getStep() + 1;
+		    	
+		    	double heuresticWeight = weight + ((weight * step) / g.vertexCount());
+		    	
+		    	//int dist = u.getDistance() + weight;
+		    	
+		    	double distanceThroughU = u.setDistance(u.getDistance() + heuresticWeight);
 		    	DijkstraVertex curVertex = vertices.get(n.getId());
 		    	if(distanceThroughU < curVertex.getDistance()) {
 		    		pq.remove(curVertex);
+		    		curVertex.setStep(u.getStep()+1);
 		    		curVertex.setDistance(distanceThroughU);
 		    		curVertex.setPrevious(u);
 		    		pq.add(curVertex);
