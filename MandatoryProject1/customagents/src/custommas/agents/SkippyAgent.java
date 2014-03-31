@@ -25,6 +25,11 @@ public class SkippyAgent extends CustomAgent {
 	}
 
 	@Override
+	public void gotoNode(String nodeId){
+		// I skip all the time
+	}
+	
+	@Override
 	protected void handleIntel(List<TeamIntel> intelList) {
 		return;
 	}

@@ -27,7 +27,7 @@ public class Edge implements Comparable<Edge> {
 	}
 	
 	public Node other(Node n) {
-		return n == v ? w : n == w ? v : null;
+		return n.getId().equals(v.getId())? w : v;
 	}
 	
 	public int getWeight() {

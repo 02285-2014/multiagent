@@ -30,7 +30,6 @@ public class ExplorerAgent extends CustomAgent{
 	private Queue<String> _destinationGoals;
 	private Queue<String> _goalInsertQueue;
 	private List<Node> _pathToDestinationGoal;
-	private boolean allProbed;
 	
 	private INodePredicate unprobedPredicate = new INodePredicate(){
 		public boolean evaluate(Node node, int comparableValue) {
@@ -48,18 +47,21 @@ public class ExplorerAgent extends CustomAgent{
 		_input = new ExplorerInput(name, new IInputCallback() {
 			@Override
 			public void inputReceived(String input){
-				boolean validId = SharedUtil.isValidNodeId(input);
-				println("Received destination goal: " + input + " [" + (validId ? "VALID" : "INVALID") + "]");
-				if(validId){
-					_goalInsertQueue.enqueue(input);
-				}
+				gotoNode(input);
 			};
 		});
+	}
+	
+	public void gotoNode(String nodeId){
+		boolean validId = SharedUtil.isValidNodeId(nodeId);
+		println("Received destination goal: " + nodeId + " [" + (validId ? "VALID" : "INVALID") + "]");
+		if(validId){
+			_goalInsertQueue.enqueue(nodeId);
+		}
 	}
 
 	@Override
 	protected void planAction() {
-		println("[PLAN_ACTION]");
 		Action act = null;
 		
 		if(_actionRound < 1){
@@ -116,7 +118,6 @@ public class ExplorerAgent extends CustomAgent{
 					Node goalNode = _graph.getNode(_destinationGoals.peek());
 					if(goalNode != null){
 						// New goal
-						// TODO: Make some heuristics that take into account that number of steps to reach the goal
 						_pathToDestinationGoal = Dijkstra.getPath(_graph, currentNode, goalNode);
 					}
 				}
@@ -143,7 +144,7 @@ public class ExplorerAgent extends CustomAgent{
 			return;
 		}
 		
-		if(allProbed){
+		if(_graph.allNodesProbed()){
 			if(_destinationGoals.size() > 0 && _graph.getNode(_destinationGoals.peek()) == null){
 				println("Invalid goal input, removing it!");
 				_destinationGoals.dequeue();
@@ -158,9 +159,7 @@ public class ExplorerAgent extends CustomAgent{
 			moveToNode = _unprobedSearch.findClosestUnexploredNodeUsingPredicate(currentNode, unprobedPredicate);
 		
 			if(moveToNode == null){
-				// Only do this if it's for the current turn as we might discover new things next turn.
 				println("No unprobed node found!");
-				allProbed = _graph.allNodesProbed();
 				_actionRound = 4;
 			}else{
 				act = planNextUnprobed(_position, moveToNode);
@@ -169,7 +168,7 @@ public class ExplorerAgent extends CustomAgent{
 					return;
 				}else{
 					println("Couldn't find path to unprobed node!");
-					_actionRound++;
+					_actionRound = 4;
 				}
 			}
 		}
@@ -211,7 +210,6 @@ public class ExplorerAgent extends CustomAgent{
 				Node node = _graph.getNode(nodeId);
 				if(node == null){
 					node = _graph.addNode(nodeId);
-					newKnowledge = true;
 				}
 				node.setOwner(ownerTeam);
 			}else if(intel.getName().equals("visibleEdge")){
@@ -224,8 +222,22 @@ public class ExplorerAgent extends CustomAgent{
 				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
 				if(edge == null){
 					_graph.addEdgeFromNodeIds(node1, node2);
-					newKnowledge = true;
 				}
+			/*}else if(intel.getName().equals("visibleEntity")){
+				if(params.length < 4) continue;
+				String agent = params[0];
+				String nodeId = params[1];
+				String status = params[2];
+				String team = params[3];
+				
+				//println("Got [visibleEntity] " + agent + ", " + team + ", " + nodeId + " -> " + node2);
+				
+				Node node = _graph.getNode(nodeId);
+				if(node == null){
+					node = _graph.addNode(nodeId);
+				}
+				
+				// Do more here at some point!*/
 			}else if(intel.getName().equals("probedVertex")){
 				if(params.length < 2) continue;
 				String nodeId = params[0];
@@ -233,13 +245,10 @@ public class ExplorerAgent extends CustomAgent{
 				
 				//println("Got [probedVertex] " + nodeId + ": " + value);
 				
-				Node node = intel.isMessage() 
-						? _graph.addNode(nodeId)
-						: _graph.getNode(nodeId);
+				Node node = _graph.getNode(nodeId);
 				
 				if(node.getValue() != value){
-					node.setValue(value);
-					newKnowledge = true;
+					_graph.setNodeProbedValue(node,  value);
 				}
 			}else if(intel.getName().equals("surveyedEdge")){
 				if(params.length < 3) continue;
@@ -249,13 +258,10 @@ public class ExplorerAgent extends CustomAgent{
 				
 				//println("Got [surveyedEdge] " + node1 + " -> " + node2 + ": " + weight);
 				
-				Edge edge = intel.isMessage() 
-						? _graph.addEdgeFromNodeIds(node1, node2)
-						: _graph.getEdgeFromNodeIds(node1, node2);
+				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
 						
 				if(edge.getWeight() != weight){
 					edge.setWeight(weight);
-					newKnowledge = true;
 				}
 			}else if(intel.getName().equals("health")){
 				if(params.length < 1) continue;
@@ -271,20 +277,14 @@ public class ExplorerAgent extends CustomAgent{
 				_maxEnergy = Integer.parseInt(params[0]);
 			}else if(intel.getName().equals("position")){
 				if(params.length < 1) continue;
-				if(intel.isPercept()){
-					if(_position == null || !_position.equals(params[0])){
-						_position = params[0];
-						newKnowledge = true;
-					}
+				if(_position == null || !_position.equals(params[0])){
+					_position = params[0];
 					_graph.setAgentLocation(_name, _position);
-				}else if(intel.isMessage()){
-					_graph.setAgentLocation(intel.getSender(), params[0]);
 				}
 			}else if(intel.getName().equals("money")){
 				if(params.length < 1) continue;
 				_money = Integer.parseInt(params[0]);
 			}else if(intel.getName().equals("achievement")){
-				// TODO: Something here?
 				String achievement = params[0];
 				println("Got achievement: " + achievement);
 			}
@@ -306,8 +306,6 @@ public class ExplorerAgent extends CustomAgent{
 		HashSet<String> checkedNodes = new HashSet<String>();
 		Queue<Node> toCheck = new Queue<Node>();
 		toCheck.enqueue(node);
-		
-		// TODO: Maybe save a list of currently visible vertices and edges!
 		
 		for(Node n : _graph.getAdjacentTo(node)){
 			if(checkedNodes.contains(n.getId())) continue;
@@ -333,7 +331,7 @@ public class ExplorerAgent extends CustomAgent{
 					pathToUnprobed.pop();
 				}
 				println("Found unprobed node (" + pathToUnprobed.size() + " steps), can reach it by movin from " + position + " to " + pathToUnprobed.peek().getId());
-				return new GotoAndProbeAction(pathToUnprobed.peek().getId(),firstUnprobed.getId(), pathToUnprobed.size());
+				return new GotoAndProbeAction(pathToUnprobed.peek().getId(), firstUnprobed.getId(), pathToUnprobed.size());
 			}
 		}
 		

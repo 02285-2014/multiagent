@@ -1,6 +1,6 @@
 package custommas.lib;
 
-public class Node {
+public class Node implements Comparable<Node> {
 	private static final int NonProbed = Integer.MIN_VALUE;
 	private String _id;
 	private String _owner;
@@ -87,5 +87,10 @@ public class Node {
 	@Override
 	public String toString(){
 		return "Node(" + _id + ")";
+	}
+
+	@Override
+	public int compareTo(Node o) {
+		return Integer.compare(_value, o._value);
 	}
 }

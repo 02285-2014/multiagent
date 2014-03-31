@@ -8,13 +8,15 @@ public class EdgeWeightedGraph extends Graph {
 	private Map<Node, Set<Node>> _adjacent;
 	private Map<String, String> _agentLocations;
 	private Set<String> _occupiedNodes;
+	private Set<String> _probedNodes;
 	
 	public EdgeWeightedGraph() {
-		this._nodes = new HashMap<String, Node>();
-		this._edges = new HashMap<String, Edge>();
-		this._adjacent = new HashMap<Node, Set<Node>>();
-		this._agentLocations = new HashMap<String, String>();
-		this._occupiedNodes = new HashSet<String>();
+		_nodes = new HashMap<String, Node>();
+		_edges = new HashMap<String, Edge>();
+		_adjacent = new HashMap<Node, Set<Node>>();
+		_agentLocations = new HashMap<String, String>();
+		_occupiedNodes = new HashSet<String>();
+		_probedNodes = new HashSet<String>();
 	}
 	
 	public int vertexCount(){
@@ -92,10 +94,6 @@ public class EdgeWeightedGraph extends Graph {
 		return this._edges.get(EdgeWeightedGraph.getEdgeId(nodeId1, nodeId2));
 	}
 	
-	public static String getEdgeId(String node1, String node2){
-		return node1.hashCode() <= node2.hashCode() ? node1 + node2 : node2 + node1;
-	}
-	
 	public void setAgentLocation(String agent, String location){
 		_agentLocations.put(agent, location);
 	}
@@ -109,6 +107,15 @@ public class EdgeWeightedGraph extends Graph {
 	
 	public boolean isNodeOccupied(String nodeId){
 		return _occupiedNodes.contains(nodeId);
+	}
+	
+	public void setNodeProbedValue(String nodeId, int probedValue){
+		setNodeProbedValue(getNode(nodeId), probedValue);
+	}
+	
+	public void setNodeProbedValue(Node node, int probedValue){
+		_probedNodes.add(node.getId());
+		node.setValue(probedValue);
 	}
 	
 	public Collection<String> getAllNodeIds() {
@@ -128,9 +135,6 @@ public class EdgeWeightedGraph extends Graph {
 	}
 	
 	public boolean allNodesProbed(){
-		for(Node node : _nodes.values()){
-			if(!node.isProbed()) return false;
-		}
-		return true;
+		return _probedNodes.size() >= _nodes.size();
 	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
+import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
 import custommas.common.TeamIntel;
 import custommas.lib.EdgeWeightedGraph;
@@ -37,11 +38,10 @@ public abstract class CustomAgent extends Agent {
 	protected static final HashSet<String> validPercepts;
 	
 	static {
-		validMessages = SharedUtil.newHashSetFromArray(new String[] {
-			"visibleVertex", "visibleEdge", "probedVertex", "surveyedEdge", "position"
-		});
+		// No longer in use, might have to use it again for part 3
+		validMessages = SharedUtil.newHashSetFromArray(new String[] { });
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
-			"visibleVertex", "visibleEdge", "probedVertex", "surveyedEdge",
+			"visibleVertex", "visibleEdge", "visibleEntity", "probedVertex", "surveyedEdge",
 			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement"
 		});
 	}
@@ -52,7 +52,7 @@ public abstract class CustomAgent extends Agent {
 		super(name, team);
 		_name = name;
 		_team = team;
-		_graph = new EdgeWeightedGraph();
+		_graph = SharedKnowledge.getGraph();
 	}
 
 	@Override
@@ -66,11 +66,9 @@ public abstract class CustomAgent extends Agent {
 		_actionRound = 0;
 		
 		List<TeamIntel> intel = new LinkedList<TeamIntel>();
-		TeamIntel[] messages = MessageCenter.getMessages(this);
-		for(TeamIntel message : messages){
+		for(TeamIntel message : MessageCenter.getMessages(this)){
 			intel.add(message);
 		}
-		println("Read all my messages: " + messages.length);
 		
 		for(Percept percept : getAllPercepts()){
 			intel.add(new TeamIntel(percept));
@@ -84,11 +82,7 @@ public abstract class CustomAgent extends Agent {
 	
 	public void planNewAction(){
 		planAction();
-		if(_actionNow != null){
-			println("Planning my action: " + _actionNow);
-		}else{
-			println("Couldn't find any action!");
-		}
+		//println("Planning my action: " + _actionNow);
 		PlanningCenter.planAction(this, _actionNow);
 	}
 	
@@ -102,14 +96,14 @@ public abstract class CustomAgent extends Agent {
 		// if agent has the goal of being recharged...
 		if (goals.contains(new LogicGoal("beAtFullCharge"))) {
 			if (maxEnergy == energy) {
-				println("I can stop recharging. I am at full charge");
+				//println("I can stop recharging. I am at full charge");
 				removeGoals("beAtFullCharge");
 			} else {
-				println("recharging...");
+				//println("recharging...");
 				return MarsUtil.rechargeAction();
 			}
 		}else if(energy < maxEnergy * threshold){
-			println("I need to recharge");
+			//println("I need to recharge");
 			goals.add(new LogicGoal("beAtFullCharge"));
 			return MarsUtil.rechargeAction();
 		}
@@ -118,14 +112,16 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	protected Action planRandomWalk(Node currentNode) {
-		println("Trying to find random node to walk to");
+		//println("Trying to find random node to walk to");
 		List<Node> neighbours = new ArrayList<Node>(_graph.getAdjacentTo(currentNode));
 		if(neighbours == null || neighbours.size() < 1) return null;
-		println("Found neighbours, will shuffle");
+		//println("Found neighbours, will shuffle");
 		Collections.shuffle(neighbours);
-		println("I will go to " + neighbours.get(0).getId());
+		//println("I will go to " + neighbours.get(0).getId());
 		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
+	
+	public abstract void gotoNode(String nodeId);
 	
 	public Action getPlannedAction(){
 		return _actionNow;
