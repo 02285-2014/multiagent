@@ -46,13 +46,11 @@ public class Dijkstra {
 		    	int weight = e.getWeight();
 		    	
 		    	int step = u.getStep() + 1;
-		    	
 		    	double heuresticWeight = weight + ((weight * step) / g.vertexCount());
-		    	
-		    	//int dist = u.getDistance() + weight;
-		    	
 		    	double distanceThroughU = u.setDistance(u.getDistance() + heuresticWeight);
+		    	
 		    	DijkstraVertex curVertex = vertices.get(n.getId());
+		    	
 		    	if(distanceThroughU < curVertex.getDistance()) {
 		    		pq.remove(curVertex);
 		    		curVertex.setStep(u.getStep()+1);

@@ -5,11 +5,16 @@ public class Node {
 	private String _id;
 	private String _owner;
 	private int _value;
+	private int _index;
+	private int _lowlink;
+	private boolean _flag = false;
 	
 	public Node(String name) {
 		if(name == null) throw new NullPointerException("Name cannot be null");
 		_id = name;
 		_value = NonProbed;
+		_index = Integer.MAX_VALUE;
+		_lowlink = Integer.MAX_VALUE;
 	}
 	
 	public Node(String name, int value) {
@@ -35,6 +40,34 @@ public class Node {
 	
 	public String getOwner(){
 		return _owner;
+	}
+	
+	public void setIndex(int newIndex) {
+		_index = newIndex;
+	}
+	
+	public int getIndex() {
+		return _index;
+	}
+	
+	public int getLowLink() {
+		return _lowlink;
+	}
+	
+	public void flag() {
+		_flag = true;
+	}
+	
+	public void unFlag() {
+		_flag = false;
+	}
+	
+	public boolean isFlagged() {
+		return _flag;
+	}
+	
+	public void setLowLink(int newLowLink) {
+		_lowlink = newLowLink;
 	}
 	
 	public boolean isProbed(){
