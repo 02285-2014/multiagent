@@ -70,22 +70,52 @@ Peter \textsc{Carlslund}\\
 
 ${}$
 \section*{Introduction}
-This assignment is about being able to explore an unknown environment with multi-agents. Furthermore the agents should be able to coordinate their position such that their team achieves a good score. This report documents our analysis of the problem, our solution and lastly the achieved results.
+This assignment is about being able to explore an unknown environment with multi-agents. Furthermore the agents should be able to coordinate their position such that their team achieves a good score. The work done is based upon our previous work for assignment 1. This report documents our analysis of the problem, our solution and lastly the achieved results.
 
 \section*{Problem Analysis}
+We have managed to map the environment with a single agent. Now we must use multiple agents to do it. This leads to some new possible problems to overcome.
+\begin{itemize}
+	\item \textbf{Faster Mapping}\\
+	Having multiple agents at our disposal should result in the environment being mapped faster.
+	\item \textbf{Working Together}\\
+	To map the environment faster, the agents should work together, which means communicating information between the agents.
+	\item \textbf{Coordinating Actions}\\
+	There is no reason to do the same work multiple times, therefore the agents should coordinate their actions.
+	\item \textbf{Achieving A Good Score}\\
+	When the environment has been mapped, we the agents should place themselves in strategically good places to obtain a good score.
+\end{itemize}
+
+The limitations from the first assignment still applies: No knowledge of direction, only able to see two 'spots' away.
 
 \subsection*{Good score}
-The notion of a good score is purposely defined vague by the problem definition. We have decided that a good score is not defined by a simple value we must achieve nor is it a score we achieve by controlling certain high value vertices. Our definition of a good score is controlling a subgraph such that it isolates that subgraph from the other teams' agents, i.e. a frontier.
+The notion of a good score is purposely defined vague by the problem definition. We have decided that a good score is to be defined as the sum of our agents \emph{Zone score}.
 
 \section*{Solution}
+\subsection*{Faster Mapping}
+With multiple agents at our disposal we had to decide how the mapping should be performed. We came to the conclusion, that the agents should map the things closest to them, and not try to state which parts of the environment they would handle alone etc. The argument was that the agents cant know if taking a path will reveal lots of new territory, thereby more work to be done, or no territory at all.\\
+\\
+We started by simply adding the 7 extra explorer agents and starting the game to see how they performed. The agents were not instructed to share knowledge nor coordinate their actions. We could see that depending on where the agents were dropped, they mapped the environment at different speeds. Most of the time, all agents had mapped the environment somewhere between step 500 and 600. We noticed that if two or more agents was located at the same vertex, they tended to follow the same path when mapping the rest of the environment.
 
-\subsection*{Messaging}
+\subsection*{Working Together}
+To improve the speed of mapping the environment, the agents needed to share their knowledge of the environment. At first we kept all the information gathered decentralized, meaning each agent had their own knowledge base. We decided that when an agent perceives something new, the agent should share the new information with the other agents. The information would be exchanged between the agents using a messaging system. When an agent perceived something new, they would broadcast it via the messaging system. When the other agents had to plan their next action, the could check for new messages. The messages would be interpreted by the agent, thereby allowing the agent to include the contents of the message in its own knowledge base.\\
+\\
+There was one problem with the messaging solution. It was always one step behind. Furthermore it did cause a minor overhead, sending, receiving and handling messages. We decided to centralize the knowledge base for the agents. Each agent would then have access to the same information about the environment at the same time, and instantly, no 'off by one' synchronization.\\
+\\
+The agents now share their knowledge. They all know when the complete environment has been mapped. An improvement in the speed of mapping the environment was also noticed. The amount of steps required had dropped to be between 350 and 400. But we still saw the same tendency that two agents would follow the same path, thereby wasting steps.
+
+\subsection*{Coordinating Actions}
+Next step to improving the mapping speed was to make the agents coordinate their actions. We took the centralized approach, as with the knowledge sharing. We had to come up with some sort of system, where the agents could tell what they planned to do. The system should support the following:
+\begin{itemize}
+	\item An unprobed vertex should only be probed by a single agent.
+	\item Unsurveyed edges visible at a vertex, should only be probed by a single agent.
+	\item When looking for unprobed vertices, only the agent with the shortest path in terms of steps required, should proceed towards the unprobed vertex.
+\end{itemize}
+
+We created a system, we'll be referring to as the \emph{planning center}. The planning center keeps track of the actions the agents wish to perform. It refuses actions that would be a duplicate of an already planned action, while also preferring actions that are more beneficial than already planned actions. The agents will only perform their action, when all agents have an action to perform that does not conflict with the others.
+\subsection*{Knowledge}
 
 
 \subsection*{Coordination}
-
-
-\subsection*{Strongly connected components}
 
 
 \section*{Results}
