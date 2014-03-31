@@ -1,7 +1,5 @@
 package custommas.common;
 
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -20,6 +18,8 @@ public class TeamIntel {
 	private String[] _parameters;
 	private String _sender = null;
 	private int _typeIs = 0;
+	
+	private TeamIntel(){}
 	
 	public TeamIntel (LogicBelief belief){
 		_name = belief.getPredicate();
@@ -63,6 +63,10 @@ public class TeamIntel {
 		return _sender;
 	}
 	
+	public void setSender(String sender){
+		_sender = sender;
+	}
+	
 	public boolean isBelief(){
 		return _typeIs == TypeIsBelief;
 	}
@@ -75,7 +79,12 @@ public class TeamIntel {
 		return _typeIs == TypeIsPercept;
 	}
 	
-	public LogicBelief toBelief(){
-		return new LogicBelief(_name, _parameters);
+	public TeamIntel asMessage(String sender){
+		TeamIntel ti = new TeamIntel();
+		ti._name = _name;
+		ti._parameters = _parameters;
+		ti._sender = sender;
+		ti._typeIs = TypeIsMessage;
+		return ti;
 	}
 }

@@ -2,6 +2,7 @@ package custommas.agents;
 
 import java.util.List;
 
+import custommas.common.PlanningCenter;
 import custommas.common.TeamIntel;
 import eis.iilang.Action;
 import massim.javaagents.agents.MarsUtil;
@@ -13,13 +14,14 @@ public class SkippyAgent extends CustomAgent {
 	
 	@Override
 	public Action step(){
-		return MarsUtil.skipAction();
+		_actionNow = MarsUtil.skipAction();
+		PlanningCenter.planAction(this, _actionNow/*, PlanningCenter.getStep()*/);
+		return _actionNow;
 	}
 	
 	@Override
-	protected void planActions(){
+	protected void planAction(){
 		_actionNow = MarsUtil.skipAction();
-		_actionNext = null;
 	}
 
 	@Override

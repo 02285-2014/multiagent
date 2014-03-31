@@ -10,7 +10,7 @@
 				blurIterations = "8"
 				optimaPercentage = "5"
 				randomSeed = "1337"
-				maxNumberOfSteps = "500">
+				maxNumberOfSteps = "5000">
 			
 			&actions;
 			&roles;	

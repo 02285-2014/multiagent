@@ -14,9 +14,9 @@ public class App {
 		System.out.println("PHASE 1: INSTANTIATING INTERPRETER");
 		AgentsInterpreter interpreter = null;
 		if (args.length != 0){ 
-			interpreter = new AgentsInterpreter(args[0]);
+			interpreter = new custommas.app.CustomAgentsInterpreter(args[0]);
 		}else{
-			interpreter = new AgentsInterpreter();
+			interpreter = new custommas.app.CustomAgentsInterpreter();
 		}
 		System.out.println("interpreter loaded");
 

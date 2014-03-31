@@ -118,4 +118,11 @@ public class EdgeWeightedGraph extends Graph {
 	public Collection<String> getAllEdges() {
 		return _edges.keySet();
 	}
+	
+	public boolean allNodesProbed(){
+		for(Node node : _nodes.values()){
+			if(!node.isProbed()) return false;
+		}
+		return true;
+	}
 }

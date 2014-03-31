@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import custommas.common.ActionSchedule;
+import custommas.common.MessageCenter;
+import custommas.common.PlanningCenter;
 import custommas.common.SharedUtil;
 import custommas.common.TeamIntel;
 import custommas.lib.EdgeWeightedGraph;
@@ -36,7 +38,8 @@ public abstract class CustomAgent extends Agent {
 	protected int _money;
 	
 	protected Action _actionNow;
-	protected Action _actionNext;
+	protected int _actionRound;
+	protected int _stepRound;
 	
 	protected static final HashSet<String> validMessages;
 	protected static final HashSet<String> validPercepts;
@@ -56,7 +59,6 @@ public abstract class CustomAgent extends Agent {
 		});
 	}
 	
-	protected ActionSchedule _actionSchedule;
 	protected EdgeWeightedGraph _graph;
 	
 	public CustomAgent(String name, String team) {
@@ -65,7 +67,6 @@ public abstract class CustomAgent extends Agent {
 		_name = name;
 		_team = team;
 		_graph = new EdgeWeightedGraph();
-		_actionSchedule = new ActionSchedule();
 	}
 
 	@Override
@@ -75,45 +76,64 @@ public abstract class CustomAgent extends Agent {
 
 	@Override
 	public Action step() {
-		_actionSchedule.clear();
+		_actionNow = null;
+		_actionRound = 0;
+		//_stepRound = PlanningCenter.getStep();
+		
 		List<TeamIntel> intel = new LinkedList<TeamIntel>();
-		for(Message message : getMessages()){
-			TeamIntel mIntel = new TeamIntel(message);
-			
-			println("Got message intel with name: " + mIntel.getName());
-			if(mIntel.getName().equals("nextAgentAction")){
-				if(mIntel.getParameters().length > 0 && validActionShouts.contains(mIntel.getParameters()[0])){
-					println("Got nextAgentAction: " + Arrays.toString(mIntel.getParameters()));
-					_actionSchedule.add(mIntel);
-				}
-			}else{
-				intel.add(mIntel);
-			}
+		TeamIntel[] messages = MessageCenter.getMessages(this);
+		for(TeamIntel message : messages){
+			intel.add(message);
 		}
+		println("Read all my messages: " + messages.length);
 		
 		for(Percept percept : getAllPercepts()){
 			intel.add(new TeamIntel(percept));
 		}
 		
-		println("[ACTION SCHEDULE]");
-		println(_actionSchedule.toString());
+		//println("Noted all my percepts");
 		
 		handleIntel(intel);
 		
-		planActions();
-		if(_actionNext != null && validActionShouts.contains(_actionNext.getName())){
-			println("Trying to make special: " + _actionNext.getName());
-			LogicBelief b = actionToBelief(_actionNext);
-			if(b != null){
-				println("[SPECIAL] Broadcasting next action: " + b.getParameters());
-				broadcastBelief(b);
+		//println("Handled all my intel");
+		
+		pingForNewAction();
+		
+		/*println("Started ping for action");
+		
+		while(!PlanningCenter.donePlanning()){
+			try {
+				if(_actionNow != null){
+					println("Waiting for PC! My action: " + _actionNow);
+				}else{
+					println("No action planned for me!");
+				}
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				println("Something went wrong waiting for planning, I'll just do as I planned to");
+				break;
 			}
-		}
+		}*/
+		
 		return _actionNow;
 	}
 	
+	public void pingForNewAction(/*int syncStep*/){
+		/*if(syncStep < _stepRound){
+			println("[OUT_OF_SYNC]");
+			return;
+		}*/
+		planAction();
+		if(_actionNow != null){
+			println("Planning my action: " + _actionNow);
+		}else{
+			println("Couldn't find any action!");
+		}
+		PlanningCenter.planAction(this, _actionNow/*, syncStep*/);
+	}
+	
 	protected abstract void handleIntel(List<TeamIntel> intelList);
-	protected abstract void planActions();
+	protected abstract void planAction();
 	
 	protected Action planRecharge(double threshold){
 		int energy = _energy;
@@ -147,101 +167,22 @@ public abstract class CustomAgent extends Agent {
 		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
 	
-	/*public int getEnergy(){
-		return _energy;
+	public Action getPlannedAction(){
+		return _actionNow;
 	}
-	
-	public int getMaxEnergy(){
-		return _maxEnergy;
-	}*/
 	
 	public boolean hasMaxEnergy(){
 		return _energy == _maxEnergy;
 	}
 	
-	/*public String getPosition() {
-		return _position;
+	@Override
+	public boolean equals(Object o){
+		if(o == null || !(o instanceof CustomAgent)) return false;
+		return _name.equals(((CustomAgent)o).getName());
 	}
 	
-	public int getHealth() {
-		return _health;
-	}
-	
-	public int getMaxHealth(){
-		return _maxHealth;
-	}*/
-	
-	private LogicBelief actionToBelief(Action action){
-		if(action != null){
-			Collection<String> pars = new LinkedList<String>();
-			if(action instanceof ProbeAction){
-				pars.add(SharedUtil.Actions.Probe);
-				pars.add(((ProbeAction)action).getNodeId());
-				pars.add("" + _internalUniqueId);
-			}else if(action instanceof SurveyAction){
-				pars.add(SharedUtil.Actions.Survey);
-				pars.add(((SurveyAction)action).getNodeId());
-				pars.add("" + _internalUniqueId);
-			}else if(action instanceof GotoAndProbeAction){
-				pars.add(SharedUtil.Actions.Custom.GoToAndProbe);
-				pars.add(((GotoAndProbeAction)action).getNodeId());
-				pars.add("" + ((GotoAndProbeAction)action).getSteps());
-			}
-			
-			if(pars.size() > 0){
-				return new LogicBelief("nextAgentAction", pars);
-			}
-		}
-		return null;
-	}
-	
-	protected class ProbeAction extends Action {
-		private String _nodeId;
-		
-		public ProbeAction(String nodeId) {
-			super(SharedUtil.Actions.Probe);
-			_nodeId = nodeId;
-		}
-		
-		public String getNodeId(){
-			return _nodeId;
-		}
-	}
-	
-	protected class SurveyAction extends Action {
-		private String _nodeId;
-		
-		public SurveyAction(String nodeId) {
-			super(SharedUtil.Actions.Survey);
-			_nodeId = nodeId;
-		}
-		
-		public String getNodeId(){
-			return _nodeId;
-		}
-	}
-	
-	protected class GotoAction extends Action {
-		private String _nodeId;
-		private int _steps;
-		
-		public GotoAction(String nodeId, int steps) {
-			super(SharedUtil.Actions.GoTo, new Identifier(nodeId));
-			_nodeId = nodeId;
-		}
-		
-		public String getNodeId(){
-			return _nodeId;
-		}
-		
-		public int getSteps(){
-			return _steps;
-		}
-	}
-	
-	protected class GotoAndProbeAction extends GotoAction {
-		public GotoAndProbeAction(String nodeId, int steps) {
-			super(nodeId, steps);
-		}		
+	@Override
+	public int hashCode(){
+		return _name.hashCode();
 	}
 }
