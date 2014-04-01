@@ -110,9 +110,7 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 						System.out.println("agent \"" + ag.getName() + "\" action \"" + act.toProlog() + "\" failed!");
 						System.out.println("message:" + e.getMessage());
 						System.out.println("cause:" + e.getCause());
-						if(verbose){
-							e.printStackTrace();
-						}
+						e.printStackTrace();
 					}
 				}
 			}
