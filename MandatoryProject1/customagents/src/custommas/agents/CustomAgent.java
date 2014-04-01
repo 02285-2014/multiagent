@@ -14,6 +14,7 @@ import custommas.common.TeamIntel;
 import custommas.lib.Edge;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
+import custommas.ui.AgentMonitor;
 
 import apltk.interpreter.data.LogicGoal;
 import eis.iilang.Action;
@@ -30,8 +31,10 @@ public abstract class CustomAgent extends Agent {
 	protected int _energy;
 	protected int _maxEnergy;
 	protected int _money;
+	protected String _role;
 	
 	protected Action _actionNow;
+	protected Action _lastAction;
 	protected int _actionRound;
 	protected int _stepRound;
 	
@@ -54,6 +57,7 @@ public abstract class CustomAgent extends Agent {
 		_name = name;
 		_team = team;
 		_graph = SharedKnowledge.getGraph();
+		AgentMonitor.getInstance().registerAgent(this);
 	}
 
 	@Override
@@ -63,6 +67,7 @@ public abstract class CustomAgent extends Agent {
 
 	@Override
 	public Action step() {
+		_lastAction = _actionNow;
 		_actionNow = null;
 		_actionRound = 0;
 		
@@ -239,8 +244,57 @@ public abstract class CustomAgent extends Agent {
 		return _actionNow;
 	}
 	
+	public Action getLastAction(){
+		return _lastAction;
+	}
+	
+	public String getPosition(){
+		return _position;
+	}
+	
+	public int getHealth(){
+		return _health;
+	}
+	
+	public int getMaxHealth(){
+		return _maxHealth;
+	}
+	
+	public boolean hasMaxHealth(){
+		return _health == _maxHealth;
+	}
+	
+	public int getEnergy(){
+		return _energy;
+	}
+	
+	public int getMaxEnergy(){
+		return _maxEnergy;
+	}
+	
 	public boolean hasMaxEnergy(){
 		return _energy == _maxEnergy;
+	}
+	
+	public String getRole(){
+		if(_role == null){
+			if(this instanceof ExplorerAgent){
+				_role = "Explorer";
+			}else if(this instanceof InspectorAgent){
+				_role = "Inspector";
+			}else if(this instanceof RepairerAgent){
+				_role = "Repairer";
+			}else if(this instanceof SaboteurAgent){
+				_role = "Saboteur";
+			}else if(this instanceof SentinelAgent){
+				_role = "Sentinel";
+			}else if(this instanceof SkippyAgent){
+				_role = "Skippy";
+			}else{
+				_role = "Unknown";
+			}
+		}
+		return _role;
 	}
 	
 	@Override

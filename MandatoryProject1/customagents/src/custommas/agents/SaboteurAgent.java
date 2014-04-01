@@ -1,5 +1,7 @@
 package custommas.agents;
 
+import massim.javaagents.agents.MarsUtil;
+
 public class SaboteurAgent extends CustomAgent {
 	public SaboteurAgent(String name, String team) {
 		super(name, team);
@@ -8,8 +10,7 @@ public class SaboteurAgent extends CustomAgent {
 
 	@Override
 	protected void planAction() {
-		// TODO Auto-generated method stub
-		
+		_actionNow = MarsUtil.parryAction();
 	}
 
 	@Override

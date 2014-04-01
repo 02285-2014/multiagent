@@ -13,13 +13,6 @@ public class SkippyAgent extends CustomAgent {
 	}
 	
 	@Override
-	public Action step(){
-		_actionNow = MarsUtil.skipAction();
-		PlanningCenter.planAction(this, _actionNow);
-		return _actionNow;
-	}
-	
-	@Override
 	protected void planAction(){
 		_actionNow = MarsUtil.skipAction();
 	}

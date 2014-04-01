@@ -13,6 +13,7 @@ import custommas.lib.SimpleGraph;
 import custommas.lib.algo.ComponentMaximumSum;
 import custommas.lib.algo.ConnectedComponent;
 import custommas.lib.algo.GraphMiscAlg;
+import custommas.ui.AgentMonitor;
 import custommas.agents.CustomAgent;
 import custommas.agents.ExplorerAgent;
 import eis.exceptions.ActException;
@@ -115,7 +116,8 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 				}
 			}
 		}
-
+		
+		AgentMonitor.getInstance().update();
 		return new StepResult();
 	}
 }

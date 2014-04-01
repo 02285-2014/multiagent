@@ -44,12 +44,12 @@ public class ExplorerAgent extends CustomAgent{
 		_destinationGoals = new Queue<String>();
 		_goalInsertQueue = new Queue<String>();
 		_pathToDestinationGoal = null;
-		_input = new ExplorerInput(name, new IInputCallback() {
-			@Override
-			public void inputReceived(String input){
-				gotoNode(input);
-			};
-		});
+//		_input = new ExplorerInput(name, new IInputCallback() {
+//			@Override
+//			public void inputReceived(String input){
+//				gotoNode(input);
+//			};
+//		});
 	}
 	
 	public void gotoNode(String nodeId){
