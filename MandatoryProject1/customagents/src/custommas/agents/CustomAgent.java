@@ -11,6 +11,7 @@ import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
 import custommas.common.TeamIntel;
+import custommas.lib.Edge;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
 
@@ -86,7 +87,118 @@ public abstract class CustomAgent extends Agent {
 		PlanningCenter.planAction(this, _actionNow);
 	}
 	
-	protected abstract void handleIntel(List<TeamIntel> intelList);
+	protected void handleIntel(List<TeamIntel> intelList){
+		_position = null;
+		for(TeamIntel intel : intelList){
+			// For now skip belief-only-intel
+			if(intel.isBelief()) continue;
+			
+			// Skip messages that are irrelevant
+			if(intel.isMessage()){
+				if(!validMessages.contains(intel.getName())) continue;
+			}else{
+				if(!validPercepts.contains(intel.getName())) continue;
+			}
+			
+			boolean newKnowledge = false;
+			String[] params = intel.getParameters();
+			
+			if(intel.getName().equals("visibleVertex")){
+				if(params.length < 2) continue;
+				String nodeId = params[0];
+				String ownerTeam = params[1];
+				
+				//println("Got [visibleVertex] " + nodeId + " owned by " + ownerTeam);
+				
+				Node node = _graph.getNode(nodeId);
+				if(node == null){
+					node = _graph.addNode(nodeId);
+				}
+				node.setOwner(ownerTeam);
+			}else if(intel.getName().equals("visibleEdge")){
+				if(params.length < 2) continue;
+				String node1 = params[0];
+				String node2 = params[1];
+				
+				//println("Got [visibleEdge] " + node1 + " -> " + node2);
+				
+				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
+				if(edge == null){
+					_graph.addEdgeFromNodeIds(node1, node2);
+				}
+			/*}else if(intel.getName().equals("visibleEntity")){
+				if(params.length < 4) continue;
+				String agent = params[0];
+				String nodeId = params[1];
+				String status = params[2];
+				String team = params[3];
+				
+				//println("Got [visibleEntity] " + agent + ", " + team + ", " + nodeId + " -> " + node2);
+				
+				Node node = _graph.getNode(nodeId);
+				if(node == null){
+					node = _graph.addNode(nodeId);
+				}
+				
+				// Do more here at some point!*/
+			}else if(intel.getName().equals("probedVertex")){
+				// Explorer only
+				if(params.length < 2) continue;
+				String nodeId = params[0];
+				int value = Integer.parseInt(params[1]);
+				
+				//println("Got [probedVertex] " + nodeId + ": " + value);
+				
+				Node node = _graph.getNode(nodeId);
+				
+				if(node.getValue() != value){
+					_graph.setNodeProbedValue(node,  value);
+				}
+			}else if(intel.getName().equals("surveyedEdge")){
+				if(params.length < 3) continue;
+				String node1 = params[0];
+				String node2 = params[1];
+				int weight = Integer.parseInt(params[2]);
+				
+				//println("Got [surveyedEdge] " + node1 + " -> " + node2 + ": " + weight);
+				
+				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
+						
+				if(edge.getWeight() != weight){
+					edge.setWeight(weight);
+				}
+			}else if(intel.getName().equals("health")){
+				if(params.length < 1) continue;
+				_health = Integer.parseInt(params[0]);
+			}else if(intel.getName().equals("maxHealth")){
+				if(params.length < 1) continue;
+				_maxHealth = Integer.parseInt(params[0]);
+			}else if(intel.getName().equals("energy")){
+				if(params.length < 1) continue;
+				_energy = Integer.parseInt(params[0]);
+			}else if(intel.getName().equals("maxEnergy")){
+				if(params.length < 1) continue;
+				_maxEnergy = Integer.parseInt(params[0]);
+			}else if(intel.getName().equals("position")){
+				if(params.length < 1) continue;
+				if(_position == null || !_position.equals(params[0])){
+					_position = params[0];
+					_graph.setAgentLocation(_name, _position);
+				}
+			}else if(intel.getName().equals("money")){
+				if(params.length < 1) continue;
+				_money = Integer.parseInt(params[0]);
+			}else if(intel.getName().equals("achievement")){
+				String achievement = params[0];
+				println("Got achievement: " + achievement);
+			}
+			
+			if(newKnowledge && intel.isPercept() && validMessages.contains(intel.getName())){
+				MessageCenter.broadcastMessage(intel.asMessage(_name));
+			}
+		}
+	}
+
 	protected abstract void planAction();
 	
 	protected Action planRecharge(double threshold){
