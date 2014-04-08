@@ -89,8 +89,14 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 		}
 		
 		if(agentList.size() > 0){
+			// Make them handle percepts and messages so they all have the same map to work with
 			for(int i = 0; i < agentList.size(); i++){
 				agentList.get(i).step();
+			}
+			
+			// Make them plan their next action.
+			for(int i = 0; i < agentList.size(); i++){
+				agentList.get(i).planNewAction();
 			}
 			
 			while(PlanningCenter.getReplanningAgentsCount() > 0 && PlanningCenter.getPlanningTimeSpendInMillis() < 1900){

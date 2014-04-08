@@ -1,10 +1,12 @@
 package custommas.agents;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
@@ -17,6 +19,8 @@ import custommas.lib.Node;
 import custommas.ui.AgentMonitor;
 
 import apltk.interpreter.data.LogicGoal;
+import eis.exceptions.NoEnvironmentException;
+import eis.exceptions.PerceiveException;
 import eis.iilang.Action;
 import eis.iilang.Percept;
 import massim.javaagents.Agent;
@@ -81,9 +85,8 @@ public abstract class CustomAgent extends Agent {
 		}
 		
 		handleIntel(intel);
-		planNewAction();
 		
-		return _actionNow;
+		return null;
 	}
 	
 	public void planNewAction(){
@@ -119,7 +122,6 @@ public abstract class CustomAgent extends Agent {
 				if(node == null){
 					node = _graph.addNode(nodeId);
 				}
-				node.setOwner(ownerTeam);
 			}else if(intel.getName().equals("visibleEdge")){
 				if(params.length < 2) continue;
 				String node1 = params[0];
@@ -131,11 +133,11 @@ public abstract class CustomAgent extends Agent {
 				if(edge == null){
 					_graph.addEdgeFromNodeIds(node1, node2);
 				}
-			/*}else if(intel.getName().equals("visibleEntity")){
+			}else if(intel.getName().equals("visibleEntity")){
 				if(params.length < 4) continue;
 				String agent = params[0];
 				String nodeId = params[1];
-				String status = params[2];
+				//String status = params[2];
 				String team = params[3];
 				
 				//println("Got [visibleEntity] " + agent + ", " + team + ", " + nodeId + " -> " + node2);
@@ -144,8 +146,7 @@ public abstract class CustomAgent extends Agent {
 				if(node == null){
 					node = _graph.addNode(nodeId);
 				}
-				
-				// Do more here at some point!*/
+				_graph.setAgentLocation(agent,  team,  nodeId);
 			}else if(intel.getName().equals("probedVertex")){
 				// Explorer only
 				if(params.length < 2) continue;
@@ -188,7 +189,7 @@ public abstract class CustomAgent extends Agent {
 				if(params.length < 1) continue;
 				if(_position == null || !_position.equals(params[0])){
 					_position = params[0];
-					_graph.setAgentLocation(_name, _position);
+					_graph.setAgentLocation(_name, _team, _position);
 				}
 			}else if(intel.getName().equals("money")){
 				if(params.length < 1) continue;
@@ -295,6 +296,45 @@ public abstract class CustomAgent extends Agent {
 			}
 		}
 		return _role;
+	}
+	
+	@Override
+	protected Collection<Percept> getAllPercepts() {
+		
+		try {
+			Map<String, Collection<Percept>> percepts = getEnvironmentInterface().getAllPercepts(getName());
+			Collection<Percept> ret = new LinkedList<Percept>();
+			for ( Collection<Percept> ps : percepts.values() ) {
+				ret.addAll(ps);
+			}
+			
+			// sweep mental attitudes if there has been a restart 
+//			int step = -1;
+//			for ( Percept p : ret ) {
+//				if ( p.getName().equals("step")) {
+//					step = new Integer(p.getParameters().get(0).toProlog()).intValue();
+//					break;
+//				}
+//			}
+//			if ( step != -1 && step < oldStep) {
+//				println("sweeping mental attitudes");
+//				beliefs.clear();
+//				goals.clear();
+//			}
+//			if ( step != -1 )
+//				oldStep = step;
+			
+			return ret;
+		} catch (PerceiveException e) {
+			//e.printStackTrace();
+			println("error perceiving \"" + e.getMessage() + "\"");	
+			return new LinkedList<Percept>();
+		} catch (NoEnvironmentException e) {
+			//e.printStackTrace();
+			println("error perceiving \"" + e.getMessage() + "\"");	
+			return new LinkedList<Percept>();
+		}
+		
 	}
 	
 	@Override

@@ -94,19 +94,16 @@ public class EdgeWeightedGraph extends Graph {
 		return this._edges.get(EdgeWeightedGraph.getEdgeId(nodeId1, nodeId2));
 	}
 	
-	public void setAgentLocation(String agent, String location){
-		_agentLocations.put(agent, location);
-	}
-	
-	public void updateOccupiedNodes(){
-		_occupiedNodes.clear();
-		for(String location : _agentLocations.values()){
-			_occupiedNodes.add(location);
+	public void setAgentLocation(String agent, String team, String location){
+		String oldLocation = _agentLocations.get(agent);
+		if(oldLocation != null){
+			if(location.equals(oldLocation)) return;
+			Node oldNode = getNode(oldLocation);
+			oldNode.removeAgent(agent, team);
 		}
-	}
-	
-	public boolean isNodeOccupied(String nodeId){
-		return _occupiedNodes.contains(nodeId);
+		_agentLocations.put(agent, location);
+		Node newNode = getNode(location);
+		newNode.addAgent(agent, team);
 	}
 	
 	public void setNodeProbedValue(String nodeId, int probedValue){

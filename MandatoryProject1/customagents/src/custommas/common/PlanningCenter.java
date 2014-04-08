@@ -70,6 +70,11 @@ public class PlanningCenter {
 				aa.action = probeAction.getName();
 				aa.target = probeAction.getNodeId();
 				_probePlan.put(probeAction.getNodeId(), aa);
+				
+				if(_goToAndProbePlan.containsKey(probeAction.getNodeId())){
+					AgentAction gapAction = _goToAndProbePlan.remove(probeAction.getNodeId());
+					agentToPing = gapAction.agent;
+				}
 			}
 
 		}else if(action instanceof SurveyAction){
@@ -86,7 +91,9 @@ public class PlanningCenter {
 			
 		}else if(action instanceof GotoAndProbeAction){
 			GotoAndProbeAction gapAction = (GotoAndProbeAction)action;
-			if(_goToAndProbePlan.containsKey(gapAction.getGoalNodeId())){
+			if(_probePlan.containsKey(gapAction.getNodeId())){
+				agentToPing = agent;
+			}else if(_goToAndProbePlan.containsKey(gapAction.getGoalNodeId())){
 				AgentAction aa = _goToAndProbePlan.get(gapAction.getGoalNodeId());
 				if(gapAction.getSteps() < aa.weight){
 					agentToPing = aa.agent;

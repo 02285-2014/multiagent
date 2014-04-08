@@ -33,7 +33,7 @@ public class ExplorerAgent extends CustomAgent{
 	
 	private INodePredicate unprobedPredicate = new INodePredicate(){
 		public boolean evaluate(Node node, int comparableValue) {
-			return !node.isProbed() && !_graph.isNodeOccupied(node.getId()) 
+			return !node.isProbed() && !node.isOccupied() 
 					&& PlanningCenter.proceed(SharedUtil.Actions.Custom.GoToAndProbe, node.getId(), comparableValue)
 					&& PlanningCenter.proceed(SharedUtil.Actions.Probe, node.getId());
 		}
@@ -44,12 +44,6 @@ public class ExplorerAgent extends CustomAgent{
 		_destinationGoals = new Queue<String>();
 		_goalInsertQueue = new Queue<String>();
 		_pathToDestinationGoal = null;
-//		_input = new ExplorerInput(name, new IInputCallback() {
-//			@Override
-//			public void inputReceived(String input){
-//				gotoNode(input);
-//			};
-//		});
 	}
 	
 	public void gotoNode(String nodeId){
