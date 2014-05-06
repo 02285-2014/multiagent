@@ -22,7 +22,7 @@ public class ComponentMaximumSum {
 	private void findMaxComponent(){
 		List<Node> preRemove = new LinkedList<Node>();
 		for(Node n : _graph.getAllNodes()){
-			if(_team != null && !n.getOwner().equals("none") && !n.getOwner().equals(_team)){
+			if(_team != null && !n.getOwnerTeam().equals("none") && !n.getOwnerTeam().equals(_team)){
 				preRemove.add(n);
 			}
 		}

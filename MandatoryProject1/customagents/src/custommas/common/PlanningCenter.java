@@ -14,6 +14,7 @@ public class PlanningCenter {
 	private static Map<String, AgentAction> _probePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _surveyPlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _goToAndProbePlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _parryPlan = new HashMap<String, AgentAction>();
 	
 	private static final HashMap<String, Map<String, AgentAction>> _actionToPlan;
 	static{
@@ -21,6 +22,7 @@ public class PlanningCenter {
 		_actionToPlan.put(SharedUtil.Actions.Probe, _probePlan);
 		_actionToPlan.put(SharedUtil.Actions.Survey, _surveyPlan);
 		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndProbe, _goToAndProbePlan);
+		_actionToPlan.put(SharedUtil.Actions.Parry, _parryPlan);
 	}
 	
 	private static final HashSet<String> bestOnlyActions = SharedUtil.newHashSetFromArray(new String[] {
