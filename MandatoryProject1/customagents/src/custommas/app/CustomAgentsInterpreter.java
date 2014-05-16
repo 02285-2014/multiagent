@@ -79,6 +79,7 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 			if(ag instanceof CustomAgent){
 				agentList.add((CustomAgent)ag);
 			}else{
+				System.out.println("Handling " + ag.getName());
 				Action act = ag.step();
 				if(act != null){
 					try {
