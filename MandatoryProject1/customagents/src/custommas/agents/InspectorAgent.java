@@ -1,11 +1,7 @@
 package custommas.agents;
 
 import java.util.Collection;
-import java.util.List;
-
-import custommas.agents.actions.GotoAction;
 import custommas.agents.actions.InspectAction;
-import custommas.agents.actions.ProbeAction;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
@@ -39,14 +35,13 @@ public class InspectorAgent extends CustomAgent {
 		//println("Current node: " + currentNode);
 		
 		if(_position == null || currentNode == null){
-			println("I do not know my position, I'll recharge");
+			println("I DO NOT KNOW WHERE I AM!!!");
 			_actionNow = MarsUtil.rechargeAction();
 			return;
 		}
 		
 		act = planGoToGoal(currentNode);
 		if(act != null){
-			println("Must go to goal node!");
 			_actionNow = act;
 			return;
 		}
@@ -62,7 +57,7 @@ public class InspectorAgent extends CustomAgent {
 		
 		if(_actionRound == 2){
 			_actionRound = 3;
-			act = planSurvey(currentNode, 2);
+			act = planSurvey(currentNode, _visibilityRange * 3);
 			if (act != null){
 				_actionNow = act;
 				return;
@@ -72,7 +67,6 @@ public class InspectorAgent extends CustomAgent {
 		if(!SharedKnowledge.zoneControlMode()){
 			act = planRandomWalk(currentNode);
 			if(act != null){
-				println("Must random walk!");
 				_actionNow = act;
 				return;
 			}
@@ -89,7 +83,6 @@ public class InspectorAgent extends CustomAgent {
 			opponents = node.getOccupantsForTeam(SharedKnowledge.OpponentTeam);
 			for(OccupyInfo info : opponents){
 				if(!SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()){
-					println("Inspecting node: " + node.getId() + ", " + info.getAgentName());
 					return new InspectAction(node.getId());
 				}
 			}
@@ -101,7 +94,6 @@ public class InspectorAgent extends CustomAgent {
 			opponents = n.getOccupantsForTeam(SharedKnowledge.OpponentTeam);
 			for(OccupyInfo info : opponents){
 				if(!SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()){
-					println("Inspecting agent: " + info.getAgentName());
 					return new InspectAction(n.getId(), info.getAgentName());
 				}
 			}

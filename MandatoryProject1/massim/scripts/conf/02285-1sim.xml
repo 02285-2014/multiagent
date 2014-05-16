@@ -5,8 +5,6 @@
 	&sim-server;
 	<match>
 		&simulation1;
-		&simulation1;
-		&simulation1;
 	</match>
 	
 	<accounts>

@@ -1,5 +1,6 @@
 package custommas.common;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -34,6 +35,14 @@ public class SharedUtil {
 			set.add(item);
 		}
 		return set;
+	}
+	
+	public static <T> T any(Collection<T> col){
+		if(col == null || col.size() < 1) return null;
+		for(T t : col){
+			return t;
+		}
+		return null;
 	}
 	
 	private static Random _random = new Random();

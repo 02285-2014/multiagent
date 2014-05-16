@@ -68,4 +68,17 @@ public class OpponentAgent {
 	public boolean inspected(){
 		return _maxHealth > 0;
 	}
+	
+	@Override
+	public int hashCode(){
+		return _name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o == this) return true;
+		if(!(o instanceof OpponentAgent)) return false;
+		OpponentAgent other = (OpponentAgent)o;
+		return _name.equals(other._name) && _team.equals(other._team);
+	}
 }

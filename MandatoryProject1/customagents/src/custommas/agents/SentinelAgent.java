@@ -3,6 +3,7 @@ package custommas.agents;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import custommas.agents.actions.GotoAction;
 import custommas.agents.actions.GotoAndProbeAction;
@@ -39,45 +40,43 @@ public class SentinelAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
+		act = planRecharge(1.0/4.0);
+		if (act != null){
+			_actionNow = act;
+			return;
+		}
+		
 		Node currentNode = _graph.getNode(_position);
 		if(_position == null || currentNode == null) {
 			// I don't know my position
-			act = planRecharge(1.0/4.0);
-			if(act != null) {
-				_actionNow = MarsUtil.rechargeAction();
-				return;
-			}
+			println("I DO NOT KNOW WHERE I AM!!!");
 			_actionNow = MarsUtil.parryAction();
 			return;
 		}
 		
-		String otherTeam = _team == "A" ? "B" : "A";
+		act = planGoToGoal(currentNode);
+		if(act != null){
+			_actionNow = act;
+			return;
+		}
+
+		Set<OpponentAgent> nearbyOpponents = super.nearbyOpponents(currentNode, 1);
 		
 		// Remember if zone-controlling - just parry. Don't be a coward!
 		// Otherwise run
 		if(SharedKnowledge.zoneControlMode()) {
-			if(currentNode.getOccupantsForTeam(otherTeam).size() > 0) {
-				// An opponent is on my node parry!
+			if(nearbyOpponents.size() > 0){
 				_actionNow = MarsUtil.parryAction();
 				_parryCount++;
 				return;
-			}
-			
-			for(Node n : _graph.getAdjacentTo(currentNode)) {
-				if(n.getOccupantsForTeam(otherTeam).size() > 0) {
-					// An opponent is close to me - parry
-					_actionNow = MarsUtil.parryAction();
-					return;
-				}
 			}
 			
 			_actionNow = MarsUtil.rechargeAction();
 			return;
 		}
 		
-		
 		if(_parryCount < 5) {
-			if(currentNode.getOccupantsForTeam(otherTeam).size() > 0) {
+			if(currentNode.getOccupantsForTeam(SharedKnowledge.OpponentTeam).size() > 0) {
 				// An opponent is on my node parry!
 				_actionNow = MarsUtil.parryAction();
 				_parryCount++;
@@ -87,37 +86,34 @@ public class SentinelAgent extends CustomAgent {
 		// Reset parrycount
 		_parryCount = 0;
 		
-		act = planRecharge(1.0/4.0);
-		if(act != null){
-			_actionNow = act;
-			return;
-		}
-		
-		act = planGoToGoal(currentNode);
-		if(act != null){
-			_actionNow = act;
-			return;
-		}
-		
-		for(Node n : _graph.getAdjacentTo(currentNode)) {
-			if(n.getOccupantsForTeam(otherTeam).size() > 0) {
-				// An opponent is close to me - run away
-				act = planRun(currentNode);
-				if(act != null) {
-					_actionNow = act;
-				}
-				_actionNow = MarsUtil.parryAction();
-				return;
+		if(nearbyOpponents.size() > 0){
+			act = planRun(currentNode);
+			if(act != null) {
+				_actionNow = act;
 			}
+			_actionNow = MarsUtil.parryAction();
+			return;
 		}	
 		
-		act = planRecharge(1.0/4.0);
+		act = planSurvey(currentNode, _visibilityRange * 3);
+		if (act != null){
+			_actionNow = act;
+			return;
+		}
+		
+		if(!SharedKnowledge.zoneControlMode()){
+			act = planRandomWalk(currentNode);
+			if(act != null){
+				_actionNow = act;
+				return;
+			}
+		}
+		
+		act = planRecharge();
 		if(act != null) {
 			_actionNow = act;
 			return;
 		}
-		
-		// PLAN SURVEY
 		
 		_actionNow = MarsUtil.parryAction();
 	}
@@ -125,12 +121,10 @@ public class SentinelAgent extends CustomAgent {
 	private Action planRun(Node currentNode) {
 		Collection<Node> possibleNodes = new HashSet<Node>(_graph.getAdjacentTo(currentNode));
 		
-		String otherTeam = _team == "A" ? "B" : "A";
-		
 		Collection<Node> adjacent = _graph.getAdjacentTo(currentNode);
 		
 		for(Node n : adjacent) {
-			if(n.getOccupantsForTeam(otherTeam).size() > 0) {
+			if(n.getOccupantsForTeam(SharedKnowledge.OpponentTeam).size() > 0) {
 				possibleNodes.remove(n);
 				
 				for(Node adjn : _graph.getAdjacentTo(n)) {

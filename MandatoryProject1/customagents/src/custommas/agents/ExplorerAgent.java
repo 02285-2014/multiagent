@@ -1,23 +1,13 @@
 package custommas.agents;
 
-import java.util.HashSet;
-import java.util.List;
-
-import custommas.agents.actions.GotoAction;
 import custommas.agents.actions.GotoAndProbeAction;
 import custommas.agents.actions.ProbeAction;
-import custommas.agents.actions.SurveyAction;
-import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
-import custommas.common.TeamIntel;
-import custommas.lib.Edge;
 import custommas.lib.Node;
-import custommas.lib.Queue;
 import custommas.lib.Stack;
 import custommas.lib.algo.BreadthFirstExplorerSearch;
-import custommas.lib.algo.Dijkstra;
 import custommas.lib.interfaces.INodePredicate;
 
 import eis.iilang.Action;
@@ -27,15 +17,12 @@ import massim.javaagents.agents.MarsUtil;
 
 public class ExplorerAgent extends CustomAgent{
 	private BreadthFirstExplorerSearch _unprobedSearch;
-	private Queue<String> _destinationGoals;
-	private Queue<String> _goalInsertQueue;
-	private List<Node> _pathToDestinationGoal;
 	
 	private INodePredicate unprobedPredicate = new INodePredicate(){
 		public boolean evaluate(Node node, int comparableValue) {
-			return !node.isProbed() && !node.isOccupied() 
+			return !node.isProbed() 
 					&& PlanningCenter.proceed(SharedUtil.Actions.Custom.GoToAndProbe, node.getId(), comparableValue)
-					&& PlanningCenter.proceed(SharedUtil.Actions.Probe, node.getId());
+					&& PlanningCenter.proceed(SharedUtil.Actions.Probe, node.getId(), 1);
 		}
 	};
 	
@@ -63,7 +50,7 @@ public class ExplorerAgent extends CustomAgent{
 		//println("Current node: " + currentNode);
 		
 		if(_position == null || currentNode == null){
-			println("I do not know my position, I'll recharge");
+			println("I DO NOT KNOW WHERE I AM!!!");
 			_actionNow = MarsUtil.rechargeAction();
 			return;
 		}
@@ -79,7 +66,7 @@ public class ExplorerAgent extends CustomAgent{
 		
 		if(_actionRound == 2){
 			_actionRound = 3;
-			act = planSurvey(currentNode, 4);
+			act = planSurvey(currentNode, _visibilityRange * 3);
 			if (act != null){
 				_actionNow = act;
 				return;
@@ -93,16 +80,6 @@ public class ExplorerAgent extends CustomAgent{
 		}
 		
 		if(!SharedKnowledge.zoneControlMode()){
-			if(_graph.allNodesProbed()){
-				if(_destinationGoals.size() > 0 && _graph.getNode(_destinationGoals.peek()) == null){
-					println("Invalid goal input, removing it!");
-					_destinationGoals.dequeue();
-				}
-				println("All nodes probed, recharging while waiting for commands!");
-				_actionNow = MarsUtil.rechargeAction();
-				return;
-			}
-			
 			if(_actionRound == 3){
 				_unprobedSearch = new BreadthFirstExplorerSearch(_graph);
 				Node moveToNode = _unprobedSearch.findClosestUnexploredNodeUsingPredicate(currentNode, unprobedPredicate);
@@ -121,6 +98,25 @@ public class ExplorerAgent extends CustomAgent{
 					}
 				}
 			}
+		} else {
+			if(_actionRound == 3){
+				if(SharedKnowledge.getMaxSumComponent() != null && SharedKnowledge.getMaxSumComponent().getNodes().contains(currentNode)){
+					_unprobedSearch = new BreadthFirstExplorerSearch(SharedKnowledge.getMaxSumComponent().getGraph());
+					Node moveToNode = _unprobedSearch.findClosestUnexploredNodeUsingPredicate(currentNode, unprobedPredicate);
+				
+					if(moveToNode == null){
+						_actionRound = 4;
+					}else{
+						act = planNextUnprobed(_position, moveToNode);
+						if(act != null){
+							_actionNow = act;
+							return;
+						}else{
+							_actionRound = 4;
+						}
+					}
+				}
+			}
 		}
 		
 		act = planRecharge();
@@ -133,19 +129,20 @@ public class ExplorerAgent extends CustomAgent{
 	}
 	
 	private Action planNextUnprobed(String position, Node firstUnprobed) {
-		//println("Trying to find unprobed node from position: " + position);
 		if(firstUnprobed != null){
 			Stack<Node> pathToUnprobed = _unprobedSearch.pathTo(firstUnprobed);
 			if(pathToUnprobed.size() > 1){
 				if(pathToUnprobed.peek().getId().equals(position)){
 					pathToUnprobed.pop();
 				}
-				//println("Found unprobed node (" + pathToUnprobed.size() + " steps), can reach it by movin from " + position + " to " + pathToUnprobed.peek().getId());
-				return new GotoAndProbeAction(pathToUnprobed.peek().getId(), firstUnprobed.getId(), pathToUnprobed.size());
+				return new GotoAndProbeAction(
+						pathToUnprobed.peek().getId(), 
+						firstUnprobed.getId(), 
+						_graph.getEdgeFromNodeIds(position, pathToUnprobed.peek().getId()).getWeight(), 
+						pathToUnprobed.size());
 			}
 		}
 		
-		//println("Couldn't find an unprobed node");
 		return null;
 	}
 }

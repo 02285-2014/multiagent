@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import custommas.agents.actions.GotoAction;
-import custommas.agents.actions.SurveyAction;
+import custommas.agents.actions.*;
 import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
@@ -19,13 +18,14 @@ import custommas.common.TeamIntel;
 import custommas.lib.Edge;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
+import custommas.lib.Node.OccupyInfo;
 import custommas.lib.Queue;
 import custommas.lib.algo.Dijkstra;
 
-import apltk.interpreter.data.LogicGoal;
 import eis.exceptions.NoEnvironmentException;
 import eis.exceptions.PerceiveException;
 import eis.iilang.Action;
+import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import massim.javaagents.Agent;
 import massim.javaagents.agents.MarsUtil;
@@ -42,17 +42,18 @@ public abstract class CustomAgent extends Agent {
 	protected int _visibilityRange;
 	
 	protected Action _actionNow;
-	protected Action _lastAction;
+	protected Action _actionLast;
+	protected String _actionLastResult;
 	protected int _actionRound;
 	protected int _stepRound;
 	
 	protected Set<String> _innerGoals;
-	private Queue<String> _destinationGoalInsertQueue;
-	private Queue<String> _destinationGoals;
+	private String _destinationGoal;
 	private List<Node> _pathToDestinationGoal;
 	
 	protected static final HashSet<String> validMessages;
 	protected static final HashSet<String> validPercepts;
+	private static final boolean _debug = true;
 	
 	static {
 		// No longer in use, might have to use it again for part 3
@@ -60,7 +61,7 @@ public abstract class CustomAgent extends Agent {
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
 			"visibleVertex", "visibleEdge", "visibleEntity", "probedVertex", "surveyedEdge",
 			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement",
-			"inspectedEntity", "score", "zonesScore"
+			"inspectedEntity", "score", "zonesScore", "lastActionResult"
 		});
 	}
 	
@@ -68,7 +69,7 @@ public abstract class CustomAgent extends Agent {
 	
 	public CustomAgent(String name, String team) {
 		super(name, team);
-		if(name.startsWith("agent")){
+		if(name.startsWith("agent") && name.length() > 5){
 			_name = name.substring(5).toLowerCase();
 		}else{
 			_name = name;
@@ -77,9 +78,10 @@ public abstract class CustomAgent extends Agent {
 		_visibilityRange = 1;
 		_graph = SharedKnowledge.getGraph();
 		_innerGoals = new HashSet<String>();
-		_destinationGoals = new Queue<String>();
-		_destinationGoalInsertQueue = new Queue<String>();
+		_destinationGoal = null;
 		_pathToDestinationGoal = null;
+		
+		SharedKnowledge.addCustomAgent(this);
 	}
 
 	@Override
@@ -89,7 +91,9 @@ public abstract class CustomAgent extends Agent {
 
 	@Override
 	public Action step() {
-		_lastAction = _actionNow;
+		_graph = SharedKnowledge.getGraph();
+		_actionLast = _actionNow;
+		_actionLastResult = "failed";
 		_actionNow = null;
 		_actionRound = 0;
 		
@@ -108,14 +112,49 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	public void planNewAction(){
-		if(_actionRound < 1){
-			while(_destinationGoalInsertQueue.size() > 0){
-				_destinationGoals.enqueue(_destinationGoalInsertQueue.dequeue());
+		planAction();
+		//println("Planning my action: " + _actionNow);
+		
+		if(_debug){
+			if(_actionLast != null){
+				println("Last action[" + _position + ", " + _health + ", " + _energy + "]: " + _actionLast.getName() + ", result: " + _actionLastResult);
+			}
+			if(_actionNow != null){
+				StringBuilder pars = new StringBuilder();
+				for(Parameter par : _actionNow.getParameters()){
+					pars.append(par.toProlog() + ", ");
+				}
+				println("Next action[" + _position + ", " + _health + ", " + _energy + "]: " + _actionNow.getName() + ", pars: " + pars.toString());
 			}
 		}
 		
-		planAction();
-		//println("Planning my action: " + _actionNow);
+		boolean forceRecharge = false;
+		if(_actionNow != null && _actionLast != null && _actionNow.getName().equals(_actionLast.getName())){
+			if(_actionLastResult.equals("failed_resources")){
+				forceRecharge = true;
+			}
+		}
+		
+		if(!forceRecharge){
+			if(_actionNow instanceof GotoAction){
+				GotoAction goAct = ((GotoAction)_actionNow);
+				forceRecharge = goAct.getWeight() != Edge.NonSurveyed && _energy < goAct.getWeight();
+			}else if(_actionNow instanceof SurveyAction){
+				forceRecharge = _energy < 1;
+			}else if(_actionNow instanceof ProbeAction){
+				forceRecharge = _energy < 1;
+			} else if(_actionNow.getName().equals("parry")){
+				forceRecharge = _energy < 2;
+			}
+		}
+		
+		if(forceRecharge){
+			println("FORCE RECHARGE!");
+			Action act = planRecharge();
+			if(act != null){
+				_actionNow = act;
+			}
+		}
 		PlanningCenter.planAction(this, _actionNow);
 	}
 	
@@ -138,9 +177,6 @@ public abstract class CustomAgent extends Agent {
 			if(intel.getName().equals("visibleVertex")){
 				if(params.length < 2) continue;
 				String nodeId = params[0];
-				String ownerTeam = params[1];
-				
-				//println("Got [visibleVertex] " + nodeId + " owned by " + ownerTeam);
 				
 				Node node = _graph.getNode(nodeId);
 				if(node == null){
@@ -151,8 +187,6 @@ public abstract class CustomAgent extends Agent {
 				String node1 = params[0];
 				String node2 = params[1];
 				
-				//println("Got [visibleEdge] " + node1 + " -> " + node2);
-				
 				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
 				if(edge == null){
 					_graph.addEdgeFromNodeIds(node1, node2);
@@ -162,9 +196,6 @@ public abstract class CustomAgent extends Agent {
 				String agent = params[0];
 				String nodeId = params[1];
 				String team = params[2];
-				//String status = params[3];
-				
-				//println("Got [visibleEntity] " + agent + ", " + team + ", " + nodeId + " -> " + node2);
 				
 				Node node = _graph.getNode(nodeId);
 				if(node == null){
@@ -177,8 +208,6 @@ public abstract class CustomAgent extends Agent {
 				String nodeId = params[0];
 				int value = Integer.parseInt(params[1]);
 				
-				//println("Got [probedVertex] " + nodeId + ": " + value);
-				
 				Node node = _graph.getNode(nodeId);
 				
 				if(node.getValue() != value){
@@ -189,8 +218,6 @@ public abstract class CustomAgent extends Agent {
 				String node1 = params[0];
 				String node2 = params[1];
 				int weight = Integer.parseInt(params[2]);
-				
-				//println("Got [surveyedEdge] " + node1 + " -> " + node2 + ": " + weight);
 				
 				Edge edge = _graph.getEdgeFromNodeIds(node1, node2);
 						
@@ -216,7 +243,7 @@ public abstract class CustomAgent extends Agent {
 					_graph.setAgentLocation(_name, _team, _position);
 				}
 			}else if(intel.getName().equals("inspectedEntity")){
-				// [b19, B, Sentinel, v206, 29, 30, 1, 1, 0, 3]
+				// Inspector only
 				String opponentName = params[0];
 				String role = params[2].toLowerCase();
 				int energy = Integer.parseInt(params[4]);
@@ -224,22 +251,12 @@ public abstract class CustomAgent extends Agent {
 				int health = Integer.parseInt(params[6]);
 				int maxHealth = Integer.parseInt(params[7]);
 				
-				println("[INSPECT] maxHealth: " + maxHealth);
-				
-				//<inspectedEntity energy="16" health="6" maxEnergy="25" maxHealth="6" name="b25" node="v97" role="Inspector" strength="0" team="B" visRange="1"/>
 				OpponentAgent opponent = SharedKnowledge.getOpponentAgent(opponentName);
 				opponent.setEnergy(energy);
 				opponent.setHealth(health);
 				opponent.setMaxEnergy(maxEnergy);
 				opponent.setMaxHealth(maxHealth);
 				opponent.setRole(role);	
-			/*else if(intel.getName().equals("money")){
-				if(params.length < 1) continue;
-				_money = Integer.parseInt(params[0]);
-			}else if(intel.getName().equals("achievement")){
-				String achievement = params[0];
-				println("Got achievement: " + achievement);
-			}*/
 			}else if(intel.getName().equals("score")){
 				if(params.length < 1) continue;
 				int score = Integer.parseInt(params[0]);
@@ -248,6 +265,8 @@ public abstract class CustomAgent extends Agent {
 				if(params.length < 1) continue;
 				int zoneScore = Integer.parseInt(params[0]);
 				SharedKnowledge.setZoneScore(zoneScore);
+			}else if(intel.getName().equals("lastActionResult")){
+				_actionLastResult = params[0];
 			}
 			
 			if(newKnowledge && intel.isPercept() && validMessages.contains(intel.getName())){
@@ -263,19 +282,17 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	protected Action planRecharge(double threshold){
-		return planRecharge((int)(threshold*_energy));
+		return planRecharge((int)(threshold*_maxEnergy));
 	}
 	
-	protected Action planRecharge(int minEnergy){
-		int energy = _energy;
-		
+	protected Action planRecharge(int minEnergy){		
 		if (_innerGoals.contains("beAtFullCharge")) {
 			if (_maxEnergy == _energy) {
 				_innerGoals.remove("beAtFullCharge");
 			} else {
 				return MarsUtil.rechargeAction();
 			}
-		}else if(energy < minEnergy){
+		}else if(_energy < minEnergy){
 			_innerGoals.add("beAtFullCharge");
 			return MarsUtil.rechargeAction();
 		}
@@ -284,13 +301,11 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	protected Action planRandomWalk(Node currentNode) {
-		//println("Trying to find random node to walk to");
+		println("PLANNING RANDOM WALK!");
 		List<Node> neighbours = new ArrayList<Node>(_graph.getAdjacentTo(currentNode));
 		if(neighbours == null || neighbours.size() < 1) return null;
-		//println("Found neighbours, will shuffle");
 		Collections.shuffle(neighbours);
-		//println("I will go to " + neighbours.get(0).getId());
-		return MarsUtil.gotoAction(neighbours.get(0).getId());
+		return new GotoAction(neighbours.get(0).getId(), 1);
 	}
 	
 	protected Action planSurvey(Node originNode) {
@@ -321,7 +336,7 @@ public abstract class CustomAgent extends Agent {
 					Edge e = _graph.getEdgeFromNodes(node, n);
 					if(!e.isSurveyed()){
 						if(++unsurveyedCount >= minUnsurveyedCount){
-							return new SurveyAction(node.getId());
+							return new SurveyAction(originNode.getId());
 						}
 					}
 				}
@@ -333,16 +348,16 @@ public abstract class CustomAgent extends Agent {
 	
 	protected Action planGoToGoal(Node currentNode){
 		Node moveToNode = null;
-		if(_destinationGoals.size() > 0){
-			println("Trying to reach goal: " + _destinationGoals.peek());
-			if(_destinationGoals.peek().equals(currentNode.getId())){
+		if(_destinationGoal != null){	
+			println("Trying to reach goal: " + _destinationGoal);
+			if(_destinationGoal.equals(currentNode.getId())){
 				// Goal reached
 				_pathToDestinationGoal = null;
-				_destinationGoals.dequeue();
+				_destinationGoal = null;
 			}
 
 			if(_pathToDestinationGoal == null){
-				Node goalNode = _graph.getNode(_destinationGoals.peek());
+				Node goalNode = _graph.getNode(_destinationGoal);
 				if(goalNode != null){
 					// New goal
 					_pathToDestinationGoal = Dijkstra.getPath(_graph, currentNode, goalNode);
@@ -366,7 +381,7 @@ public abstract class CustomAgent extends Agent {
 		
 		if(moveToNode != null){
 			println("On my way to my goal I will move from " + currentNode.getId() + " to " + moveToNode.getId());
-			return new GotoAction(moveToNode.getId(), _pathToDestinationGoal.size());
+			return new GotoAction(moveToNode.getId(), _graph.getEdgeFromNodes(currentNode, moveToNode).getWeight());
 		}
 		
 		return null;
@@ -376,20 +391,69 @@ public abstract class CustomAgent extends Agent {
 		boolean validId = SharedUtil.isValidNodeId(nodeId);
 		println("Received destination goal: " + nodeId + " [" + (validId ? "VALID" : "INVALID") + "]");
 		if(validId){
-			_destinationGoalInsertQueue.enqueue(nodeId);
+			_destinationGoal = nodeId;
+			_pathToDestinationGoal = null;
 		}
+	}
+	
+	protected Set<OpponentAgent> nearbyOpponents(Node originNode) {
+		return nearbyOpponents(originNode, _visibilityRange);
+	}
+	
+	protected Set<OpponentAgent> nearbyOpponents(Node originNode, int maxRange) {
+		return nearbyOpponents(originNode, maxRange, 0);
+	}	
+	
+	protected Set<OpponentAgent> nearbyOpponents(Node originNode, int maxRange, int timeCutOff) {
+		int range = 0;
+		Set<OpponentAgent> opponents = new HashSet<OpponentAgent>();
+		HashSet<String> checkedNodes = new HashSet<String>();
+		Queue<Node> nextCheck = new Queue<Node>();
+		nextCheck.enqueue(originNode);
+		checkedNodes.add(originNode.getId());
+		if(maxRange < 0) maxRange = _visibilityRange;
+		if(timeCutOff < 0) timeCutOff = 0;
+		
+		for(OccupyInfo info : originNode.getOccupantsForTeam(SharedKnowledge.OpponentTeam)){
+			if(info.getStepsAgo() <= timeCutOff){
+				opponents.add(SharedKnowledge.getOpponentAgent(info.getAgentName()));
+			}
+		}
+		
+		while(nextCheck.size() > 0 && range < maxRange){
+			Queue<Node> toCheck = nextCheck;
+			nextCheck = new Queue<Node>();
+			range++;
+			
+			while(toCheck.size() > 0){
+				Node node = toCheck.dequeue();
+				for(Node n : _graph.getAdjacentTo(node)){
+					if(checkedNodes.contains(n.getId())) continue;
+					nextCheck.enqueue(n);
+					checkedNodes.add(n.getId());
+					
+					for(OccupyInfo info : n.getOccupantsForTeam(SharedKnowledge.OpponentTeam)){
+						if(info.getStepsAgo() <= timeCutOff){
+							opponents.add(SharedKnowledge.getOpponentAgent(info.getAgentName()));
+						}
+					}
+				}
+			}
+		}
+		
+		return opponents;
 	}
 	
 	public Action getPlannedAction(){
 		return _actionNow;
 	}
 	
-	public Action getLastAction(){
-		return _lastAction;
-	}
-	
 	public String getPosition(){
 		return _position;
+	}
+	
+	public Node getNode(){
+		return _graph.getNode(_position);
 	}
 	
 	public int getHealth(){
