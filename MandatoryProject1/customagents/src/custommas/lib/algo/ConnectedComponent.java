@@ -8,6 +8,8 @@ import custommas.lib.Node;
 import custommas.lib.Queue;
 import custommas.lib.SimpleGraph;
 
+//Andreas (s092638)
+
 public class ConnectedComponent {
 	private HashSet<Node> _nodes;
 	private Node _minValueNode;

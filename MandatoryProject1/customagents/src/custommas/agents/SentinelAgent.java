@@ -21,22 +21,18 @@ import custommas.lib.Stack;
 import custommas.lib.algo.BreadthFirstExplorerSearch;
 import custommas.lib.algo.Dijkstra;
 import custommas.lib.interfaces.INodePredicate;
-import custommas.ui.ExplorerInput;
-import custommas.ui.IInputCallback;
 
 import eis.iilang.Action;
 import massim.javaagents.agents.MarsUtil;
 
 public class SentinelAgent extends CustomAgent {
-	private Queue<String> _goalQueue;
 	private int _parryCount;
-	private boolean _zoneControlling;
 	
 	public SentinelAgent(String name, String team) {
 		super(name, team);
-		_goalQueue = new Queue<String>();
+		_role = SharedUtil.Agents.Sentinel;
+		_visibilityRange = 3;
 		_parryCount = 0;
-		_zoneControlling = false;
 	}
 
 	@Override
@@ -59,7 +55,7 @@ public class SentinelAgent extends CustomAgent {
 		
 		// Remember if zone-controlling - just parry. Don't be a coward!
 		// Otherwise run
-		if(_zoneControlling) {
+		if(SharedKnowledge.zoneControlMode()) {
 			if(currentNode.getOccupantsForTeam(otherTeam).size() > 0) {
 				// An opponent is on my node parry!
 				_actionNow = MarsUtil.parryAction();
@@ -91,15 +87,16 @@ public class SentinelAgent extends CustomAgent {
 		// Reset parrycount
 		_parryCount = 0;
 		
-		if(!_goalQueue.isEmpty()) {
-			act = planRecharge(1.0/4.0);
-			if(act != null) {
-				_actionNow = act;
-				return;
-			}
-			
-			// GÅ TIL GOAL
-			
+		act = planRecharge(1.0/4.0);
+		if(act != null){
+			_actionNow = act;
+			return;
+		}
+		
+		act = planGoToGoal(currentNode);
+		if(act != null){
+			_actionNow = act;
+			return;
 		}
 		
 		for(Node n : _graph.getAdjacentTo(currentNode)) {
@@ -123,21 +120,6 @@ public class SentinelAgent extends CustomAgent {
 		// PLAN SURVEY
 		
 		_actionNow = MarsUtil.parryAction();
-	}
-
-	@Override
-	public void gotoNode(String nodeId) {
-		boolean isValid = SharedUtil.isValidNodeId(nodeId);
-		if(isValid) {
-			_goalQueue.enqueue(nodeId);
-		}
-	}
-	
-	private Action planSurvey(Node node) {
-		// TODO
-		if(!PlanningCenter.proceed(SharedUtil.Actions.Survey, node.getId())) return null;
-		
-		return null;
 	}
 	
 	private Action planRun(Node currentNode) {

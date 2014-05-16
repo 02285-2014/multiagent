@@ -3,6 +3,8 @@ package custommas.agents.actions;
 import custommas.common.SharedUtil;
 import eis.iilang.Action;
 
+//Morten (s133304)
+
 @SuppressWarnings("serial")
 public class ParryAction extends Action {
 	private String _nodeId;

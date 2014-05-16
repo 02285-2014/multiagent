@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import custommas.common.PlanningCenter;
 
+//Andreas (s092638)
+
 public class Node implements Comparable<Node> {
 	private static final int NonProbed = Integer.MIN_VALUE;
 	private String _id;
@@ -132,9 +134,9 @@ public class Node implements Comparable<Node> {
 		private String _agentName;
 		private String _teamName;
 		
-		private OccupyInfo(int step, String agent, String team){
+		private OccupyInfo(int step, String agentName, String team){
 			_seenAtStep = step;
-			_agentName = agent;
+			_agentName = agentName;
 			_teamName = team;
 		}
 		
@@ -146,7 +148,7 @@ public class Node implements Comparable<Node> {
 			return PlanningCenter.getStep() - _seenAtStep;
 		}
 		
-		public String getAgent(){
+		public String getAgentName(){
 			return _agentName;
 		}
 		

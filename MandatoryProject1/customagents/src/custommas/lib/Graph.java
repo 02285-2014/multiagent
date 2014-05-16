@@ -2,6 +2,8 @@ package custommas.lib;
 
 import java.util.Collection;
 
+//Andreas (s092638)
+
 public abstract class Graph {
 	public abstract int vertexCount();
 	public abstract int edgeCount();

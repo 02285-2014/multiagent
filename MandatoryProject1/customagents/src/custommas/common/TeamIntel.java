@@ -9,6 +9,8 @@ import eis.iilang.Percept;
 import apltk.interpreter.data.LogicBelief;
 import apltk.interpreter.data.Message;
 
+//Andreas (s092638)
+
 public class TeamIntel {
 	private static final int TypeIsBelief = 0;
 	private static final int TypeIsMessage = 1;

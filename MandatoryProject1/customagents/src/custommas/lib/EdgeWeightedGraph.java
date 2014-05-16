@@ -2,6 +2,8 @@ package custommas.lib;
 
 import java.util.*;
 
+//Andreas (s092638)
+
 public class EdgeWeightedGraph extends Graph {
 	private Map<String, Node> _nodes;
 	private Map<String, Edge> _edges;
@@ -102,8 +104,12 @@ public class EdgeWeightedGraph extends Graph {
 			oldNode.removeAgent(agent, team);
 		}
 		_agentLocations.put(agent, location);
-		Node newNode = getNode(location);
+		Node newNode = addNode(location);
 		newNode.addAgent(agent, team);
+	}
+	
+	public String getAgentLocation(String agent, String team){
+		return _agentLocations.get(agent);
 	}
 	
 	public void setNodeProbedValue(String nodeId, int probedValue){

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//Andreas (s092638)
+
 public class SimpleGraph extends Graph {
 	private Map<String, Node> _nodes;
 	private Map<String, Edge> _edges;

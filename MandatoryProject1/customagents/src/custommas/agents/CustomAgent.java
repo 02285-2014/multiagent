@@ -7,7 +7,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import custommas.agents.actions.GotoAction;
+import custommas.agents.actions.SurveyAction;
 import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
@@ -16,7 +19,8 @@ import custommas.common.TeamIntel;
 import custommas.lib.Edge;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
-import custommas.ui.AgentMonitor;
+import custommas.lib.Queue;
+import custommas.lib.algo.Dijkstra;
 
 import apltk.interpreter.data.LogicGoal;
 import eis.exceptions.NoEnvironmentException;
@@ -34,13 +38,18 @@ public abstract class CustomAgent extends Agent {
 	protected int _maxHealth;
 	protected int _energy;
 	protected int _maxEnergy;
-	protected int _money;
 	protected String _role;
+	protected int _visibilityRange;
 	
 	protected Action _actionNow;
 	protected Action _lastAction;
 	protected int _actionRound;
 	protected int _stepRound;
+	
+	protected Set<String> _innerGoals;
+	private Queue<String> _destinationGoalInsertQueue;
+	private Queue<String> _destinationGoals;
+	private List<Node> _pathToDestinationGoal;
 	
 	protected static final HashSet<String> validMessages;
 	protected static final HashSet<String> validPercepts;
@@ -50,7 +59,8 @@ public abstract class CustomAgent extends Agent {
 		validMessages = SharedUtil.newHashSetFromArray(new String[] { });
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
 			"visibleVertex", "visibleEdge", "visibleEntity", "probedVertex", "surveyedEdge",
-			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement"
+			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement",
+			"inspectedEntity", "score", "zonesScore"
 		});
 	}
 	
@@ -58,10 +68,18 @@ public abstract class CustomAgent extends Agent {
 	
 	public CustomAgent(String name, String team) {
 		super(name, team);
-		_name = name;
+		if(name.startsWith("agent")){
+			_name = name.substring(5).toLowerCase();
+		}else{
+			_name = name;
+		}
 		_team = team;
+		_visibilityRange = 1;
 		_graph = SharedKnowledge.getGraph();
-		AgentMonitor.getInstance().registerAgent(this);
+		_innerGoals = new HashSet<String>();
+		_destinationGoals = new Queue<String>();
+		_destinationGoalInsertQueue = new Queue<String>();
+		_pathToDestinationGoal = null;
 	}
 
 	@Override
@@ -90,6 +108,12 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	public void planNewAction(){
+		if(_actionRound < 1){
+			while(_destinationGoalInsertQueue.size() > 0){
+				_destinationGoals.enqueue(_destinationGoalInsertQueue.dequeue());
+			}
+		}
+		
 		planAction();
 		//println("Planning my action: " + _actionNow);
 		PlanningCenter.planAction(this, _actionNow);
@@ -137,8 +161,8 @@ public abstract class CustomAgent extends Agent {
 				if(params.length < 4) continue;
 				String agent = params[0];
 				String nodeId = params[1];
-				//String status = params[2];
-				String team = params[3];
+				String team = params[2];
+				//String status = params[3];
 				
 				//println("Got [visibleEntity] " + agent + ", " + team + ", " + nodeId + " -> " + node2);
 				
@@ -191,12 +215,39 @@ public abstract class CustomAgent extends Agent {
 					_position = params[0];
 					_graph.setAgentLocation(_name, _team, _position);
 				}
-			}else if(intel.getName().equals("money")){
+			}else if(intel.getName().equals("inspectedEntity")){
+				// [b19, B, Sentinel, v206, 29, 30, 1, 1, 0, 3]
+				String opponentName = params[0];
+				String role = params[2].toLowerCase();
+				int energy = Integer.parseInt(params[4]);
+				int maxEnergy = Integer.parseInt(params[5]);
+				int health = Integer.parseInt(params[6]);
+				int maxHealth = Integer.parseInt(params[7]);
+				
+				println("[INSPECT] maxHealth: " + maxHealth);
+				
+				//<inspectedEntity energy="16" health="6" maxEnergy="25" maxHealth="6" name="b25" node="v97" role="Inspector" strength="0" team="B" visRange="1"/>
+				OpponentAgent opponent = SharedKnowledge.getOpponentAgent(opponentName);
+				opponent.setEnergy(energy);
+				opponent.setHealth(health);
+				opponent.setMaxEnergy(maxEnergy);
+				opponent.setMaxHealth(maxHealth);
+				opponent.setRole(role);	
+			/*else if(intel.getName().equals("money")){
 				if(params.length < 1) continue;
 				_money = Integer.parseInt(params[0]);
 			}else if(intel.getName().equals("achievement")){
 				String achievement = params[0];
 				println("Got achievement: " + achievement);
+			}*/
+			}else if(intel.getName().equals("score")){
+				if(params.length < 1) continue;
+				int score = Integer.parseInt(params[0]);
+				SharedKnowledge.setTeamScore(score);
+			}else if(intel.getName().equals("zonesScore")){
+				if(params.length < 1) continue;
+				int zoneScore = Integer.parseInt(params[0]);
+				SharedKnowledge.setZoneScore(zoneScore);
 			}
 			
 			if(newKnowledge && intel.isPercept() && validMessages.contains(intel.getName())){
@@ -207,22 +258,25 @@ public abstract class CustomAgent extends Agent {
 
 	protected abstract void planAction();
 	
+	protected Action planRecharge(){
+		return planRecharge(_maxEnergy);
+	}
+	
 	protected Action planRecharge(double threshold){
+		return planRecharge((int)(threshold*_energy));
+	}
+	
+	protected Action planRecharge(int minEnergy){
 		int energy = _energy;
-		int maxEnergy = _maxEnergy;
 		
-		// if agent has the goal of being recharged...
-		if (goals.contains(new LogicGoal("beAtFullCharge"))) {
-			if (maxEnergy == energy) {
-				//println("I can stop recharging. I am at full charge");
-				removeGoals("beAtFullCharge");
+		if (_innerGoals.contains("beAtFullCharge")) {
+			if (_maxEnergy == _energy) {
+				_innerGoals.remove("beAtFullCharge");
 			} else {
-				//println("recharging...");
 				return MarsUtil.rechargeAction();
 			}
-		}else if(energy < maxEnergy * threshold){
-			//println("I need to recharge");
-			goals.add(new LogicGoal("beAtFullCharge"));
+		}else if(energy < minEnergy){
+			_innerGoals.add("beAtFullCharge");
 			return MarsUtil.rechargeAction();
 		}
 		
@@ -239,7 +293,92 @@ public abstract class CustomAgent extends Agent {
 		return MarsUtil.gotoAction(neighbours.get(0).getId());
 	}
 	
-	public abstract void gotoNode(String nodeId);
+	protected Action planSurvey(Node originNode) {
+		return planSurvey(originNode, 1);
+	}
+	
+	protected Action planSurvey(Node originNode, int minUnsurveyedCount) {
+		if(!PlanningCenter.proceed(SharedUtil.Actions.Survey, originNode.getId())) return null;
+		
+		int range = 0;
+		int unsurveyedCount = 0;
+		HashSet<String> checkedNodes = new HashSet<String>();
+		Queue<Node> nextCheck = new Queue<Node>();
+		nextCheck.enqueue(originNode);
+		checkedNodes.add(originNode.getId());
+		
+		while(nextCheck.size() > 0 && range < _visibilityRange){
+			Queue<Node> toCheck = nextCheck;
+			nextCheck = new Queue<Node>();
+			range++;
+			
+			while(toCheck.size() > 0){
+				Node node = toCheck.dequeue();
+				for(Node n : _graph.getAdjacentTo(node)){
+					if(checkedNodes.contains(n.getId())) continue;
+					nextCheck.enqueue(n);
+					checkedNodes.add(n.getId());
+					Edge e = _graph.getEdgeFromNodes(node, n);
+					if(!e.isSurveyed()){
+						if(++unsurveyedCount >= minUnsurveyedCount){
+							return new SurveyAction(node.getId());
+						}
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	protected Action planGoToGoal(Node currentNode){
+		Node moveToNode = null;
+		if(_destinationGoals.size() > 0){
+			println("Trying to reach goal: " + _destinationGoals.peek());
+			if(_destinationGoals.peek().equals(currentNode.getId())){
+				// Goal reached
+				_pathToDestinationGoal = null;
+				_destinationGoals.dequeue();
+			}
+
+			if(_pathToDestinationGoal == null){
+				Node goalNode = _graph.getNode(_destinationGoals.peek());
+				if(goalNode != null){
+					// New goal
+					_pathToDestinationGoal = Dijkstra.getPath(_graph, currentNode, goalNode);
+				}
+			}
+			
+			if(_pathToDestinationGoal != null){
+				while(_pathToDestinationGoal.size() > 0 && _pathToDestinationGoal.get(0).equals(currentNode)){
+					_pathToDestinationGoal.remove(0);
+				}
+				if(_pathToDestinationGoal.size() > 0){
+					moveToNode = _pathToDestinationGoal.get(0);
+				}
+			}
+		}
+		
+		if(moveToNode != null && !_graph.getAdjacentTo(currentNode).contains(moveToNode)){
+			println("Trying to move to node i cant move to!");
+			moveToNode = null;
+		}
+		
+		if(moveToNode != null){
+			println("On my way to my goal I will move from " + currentNode.getId() + " to " + moveToNode.getId());
+			return new GotoAction(moveToNode.getId(), _pathToDestinationGoal.size());
+		}
+		
+		return null;
+	}
+	
+	public void gotoNode(String nodeId){
+		boolean validId = SharedUtil.isValidNodeId(nodeId);
+		println("Received destination goal: " + nodeId + " [" + (validId ? "VALID" : "INVALID") + "]");
+		if(validId){
+			_destinationGoalInsertQueue.enqueue(nodeId);
+		}
+	}
 	
 	public Action getPlannedAction(){
 		return _actionNow;
@@ -278,23 +417,6 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	public String getRole(){
-		if(_role == null){
-			if(this instanceof ExplorerAgent){
-				_role = "Explorer";
-			}else if(this instanceof InspectorAgent){
-				_role = "Inspector";
-			}else if(this instanceof RepairerAgent){
-				_role = "Repairer";
-			}else if(this instanceof SaboteurAgent){
-				_role = "Saboteur";
-			}else if(this instanceof SentinelAgent){
-				_role = "Sentinel";
-			}else if(this instanceof SkippyAgent){
-				_role = "Skippy";
-			}else{
-				_role = "Unknown";
-			}
-		}
 		return _role;
 	}
 	

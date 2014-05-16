@@ -4,17 +4,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import custommas.agents.CustomAgent;
-import custommas.agents.actions.GotoAndProbeAction;
-import custommas.agents.actions.ProbeAction;
-import custommas.agents.actions.SurveyAction;
+import custommas.agents.actions.*;
 import custommas.lib.Queue;
 import eis.iilang.Action;
+
+//Andreas (s092638)
+//Morten (s133304)
 
 public class PlanningCenter {
 	private static Map<String, AgentAction> _probePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _surveyPlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _goToAndProbePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _parryPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _inspectPlan = new HashMap<String, AgentAction>();
 	
 	private static final HashMap<String, Map<String, AgentAction>> _actionToPlan;
 	static{
@@ -23,11 +25,12 @@ public class PlanningCenter {
 		_actionToPlan.put(SharedUtil.Actions.Survey, _surveyPlan);
 		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndProbe, _goToAndProbePlan);
 		_actionToPlan.put(SharedUtil.Actions.Parry, _parryPlan);
+		_actionToPlan.put(SharedUtil.Actions.Inspect, _inspectPlan);
 	}
 	
 	private static final HashSet<String> bestOnlyActions = SharedUtil.newHashSetFromArray(new String[] {
 		ProbeAction.class.getSimpleName(), SurveyAction.class.getSimpleName(),
-		GotoAndProbeAction.class.getSimpleName()
+		GotoAndProbeAction.class.getSimpleName(), InspectAction.class.getSimpleName()
 	});
 	
 	public static Queue<CustomAgent> _replanRequired = new Queue<CustomAgent>();
@@ -110,6 +113,26 @@ public class PlanningCenter {
 				aa.target = gapAction.getNodeId();
 				aa.weight = gapAction.getSteps();
 				_goToAndProbePlan.put(gapAction.getGoalNodeId(), aa);
+			}
+			
+		}else if(action instanceof InspectAction){
+			InspectAction inspectAction = (InspectAction)action;
+			if(_inspectPlan.containsKey(inspectAction.getNodeId())){
+				AgentAction aa = _inspectPlan.get(inspectAction.getNodeId());
+				if(!inspectAction.isRanged() && aa.weight > 0){
+					agentToPing = aa.agent;
+				}else{
+					agentToPing = agent;
+				}
+			}
+			
+			if(agentToPing != agent){
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = inspectAction.getName();
+				aa.target = inspectAction.getNodeId();
+				aa.weight = inspectAction.isRanged() ? 1 : 0;
+				_inspectPlan.put(inspectAction.getNodeId(), aa);
 			}
 		}
 		

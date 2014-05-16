@@ -8,6 +8,8 @@ import custommas.lib.Node;
 import custommas.lib.Queue;
 import custommas.lib.SimpleGraph;
 
+//Andreas (s092638)
+
 public class GraphMiscAlg {
 	public static Node nodeFarthestAway(SimpleGraph graph, Collection<Node> sourceNodes){
 		HashSet<Node> visited = new HashSet<Node>();

@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+//Andreas (s092638)
+
 public class SharedUtil {
 	// We believe node IDs are consistent with their syntax: s[0-9]+
 	// Therefore we can parse it directly without defensive checks
@@ -38,7 +40,15 @@ public class SharedUtil {
 	public static int randInt(int min, int max){
 		return max >= min ?_random.nextInt(max) + min : randInt(max, min);
 	}
-
+	
+	public class Agents {
+		public static final String Explorer = "explorer";
+		public static final String Inspector = "inspector";
+		public static final String Repairer = "repairer";
+		public static final String Saboteur = "saboteur";
+		public static final String Sentinel = "sentinel";
+	}
+	
 	public class Actions {
 		public static final String Attack = "attack";
 		public static final String Buy = "buy";

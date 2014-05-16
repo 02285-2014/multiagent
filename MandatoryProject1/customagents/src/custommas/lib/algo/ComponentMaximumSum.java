@@ -6,6 +6,7 @@ import java.util.List;
 import custommas.lib.Node;
 import custommas.lib.SimpleGraph;
 
+//Morten (s133304)
 public class ComponentMaximumSum {
 	private SimpleGraph _graph;
 	private int _maxComponentSize;
