@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import massim.javaagents.Agent;
 
+//Andreas (s092638)
+
 public class MessageCenter {
 	private static ArrayList<TeamIntel> _messages = new ArrayList<TeamIntel>();
 	private static HashMap<String, Integer> _agentIndex = new HashMap<String, Integer>();

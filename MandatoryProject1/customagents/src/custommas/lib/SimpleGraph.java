@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//Andreas (s092638)
+
 public class SimpleGraph extends Graph {
 	private Map<String, Node> _nodes;
 	private Map<String, Edge> _edges;
@@ -45,6 +47,26 @@ public class SimpleGraph extends Graph {
 			_adjacent.put(node, new HashSet<Node>());
 		}
 		for(Edge edge : ewg.getAllEdges()){
+			Node n1 = edge.either();
+			Node n2 = edge.other(n1);
+			
+			if(!onlyTheseNodes.contains(n1) || !onlyTheseNodes.contains(n2)) continue;
+			_edges.put(edge.getId(), edge);
+			if(!_adjacent.get(n1).contains(n2)){
+				_adjacent.get(n1).add(n2);
+				_adjacent.get(n2).add(n1);
+			}
+		}
+	}
+	
+	public SimpleGraph(SimpleGraph sg, Set<Node> onlyTheseNodes){
+		this();
+		for(Node node : sg.getAllNodes()){
+			if(!onlyTheseNodes.contains(node)) continue;
+			_nodes.put(node.getId(), node);
+			_adjacent.put(node, new HashSet<Node>());
+		}
+		for(Edge edge : sg.getAllEdges()){
 			Node n1 = edge.either();
 			Node n2 = edge.other(n1);
 			

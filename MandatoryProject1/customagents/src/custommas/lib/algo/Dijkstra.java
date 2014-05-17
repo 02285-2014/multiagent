@@ -4,6 +4,8 @@ import java.util.*;
 
 import custommas.lib.*;
 
+//Morten (s133304)
+
 public class Dijkstra {
 	private static final int maxDistance = Integer.MAX_VALUE; 
 	private static Set<String> nodes;

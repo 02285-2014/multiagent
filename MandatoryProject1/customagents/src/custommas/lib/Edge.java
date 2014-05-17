@@ -1,7 +1,9 @@
 package custommas.lib;
 
+//Andreas (s092638)
+
 public class Edge implements Comparable<Edge> {
-	private static final int NonSurveyed = Integer.MIN_VALUE;
+	public static final int NonSurveyed = Integer.MAX_VALUE;
 	private Node v;
 	private Node w;
 	private int weight;

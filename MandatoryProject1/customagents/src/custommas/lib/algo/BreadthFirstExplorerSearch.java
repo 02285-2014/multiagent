@@ -10,6 +10,8 @@ import custommas.lib.Queue;
 import custommas.lib.Stack;
 import custommas.lib.interfaces.INodePredicate;
 
+//Andreas (s092638)
+
 public class BreadthFirstExplorerSearch {
     private HashSet<Node> marked; // marked[v] = is there an s-v path
     private HashMap<Node, Node> edgeTo; // edgeTo[v] = previous edge on shortest s-v path

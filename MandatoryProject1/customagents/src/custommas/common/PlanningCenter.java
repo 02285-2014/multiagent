@@ -4,17 +4,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import custommas.agents.CustomAgent;
-import custommas.agents.actions.GotoAndProbeAction;
-import custommas.agents.actions.ProbeAction;
-import custommas.agents.actions.SurveyAction;
+import custommas.agents.actions.*;
 import custommas.lib.Queue;
 import eis.iilang.Action;
+
+//Andreas (s092638)
+//Morten (s133304)
 
 public class PlanningCenter {
 	private static Map<String, AgentAction> _probePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _surveyPlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _goToAndProbePlan = new HashMap<String, AgentAction>();
-	private static Map<String, AgentAction> _parryPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _inspectPlan = new HashMap<String, AgentAction>();
 	
 	private static final HashMap<String, Map<String, AgentAction>> _actionToPlan;
 	static{
@@ -22,15 +23,15 @@ public class PlanningCenter {
 		_actionToPlan.put(SharedUtil.Actions.Probe, _probePlan);
 		_actionToPlan.put(SharedUtil.Actions.Survey, _surveyPlan);
 		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndProbe, _goToAndProbePlan);
-		_actionToPlan.put(SharedUtil.Actions.Parry, _parryPlan);
+		_actionToPlan.put(SharedUtil.Actions.Inspect, _inspectPlan);
 	}
 	
 	private static final HashSet<String> bestOnlyActions = SharedUtil.newHashSetFromArray(new String[] {
 		ProbeAction.class.getSimpleName(), SurveyAction.class.getSimpleName(),
-		GotoAndProbeAction.class.getSimpleName()
+		GotoAndProbeAction.class.getSimpleName(), InspectAction.class.getSimpleName()
 	});
 	
-	public static Queue<CustomAgent> _replanRequired = new Queue<CustomAgent>();
+	private static Queue<CustomAgent> _replanRequired = new Queue<CustomAgent>();
 	
 	private static int _stepCounter = 0;
 	private static long _stepTime = System.currentTimeMillis();
@@ -44,9 +45,10 @@ public class PlanningCenter {
 			System.out.println("Planning Center: New step, clearing old plans!");
 			_stepCounter = step;
 			_stepTime = System.currentTimeMillis();
-			_probePlan.clear();
-			_surveyPlan.clear();
-			_goToAndProbePlan.clear();
+			_replanRequired = new Queue<CustomAgent>();
+			for(Map<String, AgentAction> plan : _actionToPlan.values()){
+				plan.clear();
+			}
 		}
 		return _stepCounter;
 	}
@@ -71,6 +73,7 @@ public class PlanningCenter {
 				aa.agent = agent;
 				aa.action = probeAction.getName();
 				aa.target = probeAction.getNodeId();
+				aa.weight = 0;
 				_probePlan.put(probeAction.getNodeId(), aa);
 				
 				if(_goToAndProbePlan.containsKey(probeAction.getNodeId())){
@@ -88,12 +91,13 @@ public class PlanningCenter {
 				aa.agent = agent;
 				aa.action = surveyAction.getName();
 				aa.target = surveyAction.getNodeId();
+				aa.weight = 0;
 				_surveyPlan.put(surveyAction.getNodeId(), aa);
 			}
 			
 		}else if(action instanceof GotoAndProbeAction){
 			GotoAndProbeAction gapAction = (GotoAndProbeAction)action;
-			if(_probePlan.containsKey(gapAction.getNodeId())){
+			if(_probePlan.containsKey(gapAction.getGoalNodeId())){
 				agentToPing = agent;
 			}else if(_goToAndProbePlan.containsKey(gapAction.getGoalNodeId())){
 				AgentAction aa = _goToAndProbePlan.get(gapAction.getGoalNodeId());
@@ -107,9 +111,29 @@ public class PlanningCenter {
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = gapAction.getName();
-				aa.target = gapAction.getNodeId();
+				aa.target = gapAction.getGoalNodeId();
 				aa.weight = gapAction.getSteps();
 				_goToAndProbePlan.put(gapAction.getGoalNodeId(), aa);
+			}
+			
+		}else if(action instanceof InspectAction){
+			InspectAction inspectAction = (InspectAction)action;
+			if(_inspectPlan.containsKey(inspectAction.getNodeId())){
+				AgentAction aa = _inspectPlan.get(inspectAction.getNodeId());
+				if(!inspectAction.isRanged() && aa.weight > 0){
+					agentToPing = aa.agent;
+				}else{
+					agentToPing = agent;
+				}
+			}
+			
+			if(agentToPing != agent){
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = inspectAction.getName();
+				aa.target = inspectAction.getNodeId();
+				aa.weight = inspectAction.isRanged() ? 1 : 0;
+				_inspectPlan.put(inspectAction.getNodeId(), aa);
 			}
 		}
 		

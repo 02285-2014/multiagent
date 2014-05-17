@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import custommas.common.SharedKnowledge;
+import custommas.lib.Edge;
+import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
 import custommas.lib.Queue;
 import custommas.lib.SimpleGraph;
+
+//Andreas (s092638)
 
 public class ConnectedComponent {
 	private HashSet<Node> _nodes;
 	private Node _minValueNode;
 	private int _sum;
+	private SimpleGraph _graph;
 	
 	private ConnectedComponent(){
 		_nodes = new HashSet<Node>();
@@ -41,6 +47,23 @@ public class ConnectedComponent {
 	
 	public Set<Node> getNodes(){
 		return _nodes;
+	}
+	
+	public SimpleGraph getGraph(){
+		if(_graph == null){
+			SimpleGraph graph = new SimpleGraph();
+			
+			for(Node node : _nodes){
+				graph.addNode(node.getId());
+				for(Node adjacent : SharedKnowledge.getGraph().getAdjacentTo(node)){
+					if(!_nodes.contains(adjacent)) continue;
+					graph.addEdge(node, adjacent);
+				}
+			}
+			
+			_graph = graph;
+		}
+		return _graph;
 	}
 	
 	public static ArrayList<ConnectedComponent> getComponents(SimpleGraph graph){

@@ -1,6 +1,6 @@
 package custommas.lib.algo;
 
-
+//Morten (s133304)
 public class DijkstraVertex implements Comparable<DijkstraVertex> {
 	private String id;
 	private double distance;

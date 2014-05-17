@@ -3,7 +3,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 //Source: Algorithms 4th Edition, Sedgewick & Wayne
-
 public class Stack<T> implements Iterable<T> {
     private int N;                // size of the stack
     private Node<T> first;     // top of stack

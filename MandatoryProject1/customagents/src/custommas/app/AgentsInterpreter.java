@@ -142,7 +142,7 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 		String str = ((Element)root).getAttribute("iilang");
 		if ( str != null && str.equals("") == false ) {
 			if ( str.equals("yes") || str.equals("true") ) {
-				verbose = true;
+				//verbose = true;
 			}
 			else if ( str.equals("no") || str.equals("false") ) {}
 			else {
@@ -239,7 +239,7 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 			} catch (RelationException e) {
 				e.printStackTrace();
 			}
-			System.out.println("associated agent \"" + agent.getName() + "\" with entity \"" + as.entity + "\"");
+			//System.out.println("associated agent \"" + agent.getName() + "\" with entity \"" + as.entity + "\"");
 
 			ei.attachAgentListener(agent.getName(), this);
 
@@ -250,7 +250,7 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 		ei.attachEnvironmentListener(this);
 		
 		// free entities
-		System.out.println("free entities: " + ei.getFreeEntities());
+		//System.out.println("free entities: " + ei.getFreeEntities());
 	}
 
 	//@Override
