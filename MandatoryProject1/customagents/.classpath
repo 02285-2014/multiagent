@@ -11,6 +11,7 @@
 	<classpathentry kind="lib" path="lib/javaagents-2.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/javaagents-2.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/javaagents-2.1.jar" sourcepath="lib/javaagents-2.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/dependency/apltk-0.1.jar" sourcepath="lib/dependency/apltk-0.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Morten Eskesen/Dropbox/Mine ting/DTU/02285 - Git/MandatoryProject1/customagents/lib/dependency/eis-0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

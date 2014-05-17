@@ -31,12 +31,14 @@ public class SentinelAgent extends CustomAgent {
 	private Queue<String> _goalQueue;
 	private int _parryCount;
 	private boolean _zoneControlling;
+	private List<Node> _pathToDestinationGoal;
 	
 	public SentinelAgent(String name, String team) {
 		super(name, team);
 		_goalQueue = new Queue<String>();
 		_parryCount = 0;
 		_zoneControlling = false;
+		_pathToDestinationGoal = null;
 	}
 
 	@Override
@@ -60,6 +62,12 @@ public class SentinelAgent extends CustomAgent {
 		// Remember if zone-controlling - just parry. Don't be a coward!
 		// Otherwise run
 		if(_zoneControlling) {
+			act = planRecharge(1.0/4.0);
+			if(act != null) {
+				_actionNow = act;
+				return;
+			}
+			
 			if(currentNode.getOccupantsForTeam(otherTeam).size() > 0) {
 				// An opponent is on my node parry!
 				_actionNow = MarsUtil.parryAction();
@@ -79,11 +87,16 @@ public class SentinelAgent extends CustomAgent {
 			return;
 		}
 		
+		act = planSurvey(currentNode);
+		if(act != null) {
+			_actionNow = act;
+			return;
+		}
 		
 		if(_parryCount < 5) {
 			if(currentNode.getOccupantsForTeam(otherTeam).size() > 0) {
 				// An opponent is on my node parry!
-				_actionNow = MarsUtil.parryAction();
+				_actionNow = MarsUtil.rechargeAction();
 				_parryCount++;
 				return;
 			}
@@ -91,6 +104,7 @@ public class SentinelAgent extends CustomAgent {
 		// Reset parrycount
 		_parryCount = 0;
 		
+		Node moveToNode = null;
 		if(!_goalQueue.isEmpty()) {
 			act = planRecharge(1.0/4.0);
 			if(act != null) {
@@ -98,8 +112,40 @@ public class SentinelAgent extends CustomAgent {
 				return;
 			}
 			
-			// GÅ TIL GOAL
+			if(_goalQueue.peek().equals(currentNode.getId())){
+				// Goal reached
+				_pathToDestinationGoal = null;
+				_goalQueue.dequeue();
+			}else{
+				if(_pathToDestinationGoal == null){
+					Node goalNode = _graph.getNode(_goalQueue.peek());
+					if(goalNode != null){
+						// New goal
+						_pathToDestinationGoal = Dijkstra.getPath(_graph, currentNode, goalNode);
+					}
+				}
+				
+				if(_pathToDestinationGoal != null){
+					while(_pathToDestinationGoal.size() > 0 && _pathToDestinationGoal.get(0).equals(currentNode)){
+						_pathToDestinationGoal.remove(0);
+					}
+					if(_pathToDestinationGoal.size() > 0){
+						moveToNode = _pathToDestinationGoal.get(0);
+					}
+				}
+			}
 			
+		}
+		
+		if(moveToNode != null && !_graph.getAdjacentTo(currentNode).contains(moveToNode)){
+			println("Trying to move to node i cant move to!");
+			moveToNode = null;
+		}
+		
+		if(moveToNode != null){
+			println("On my way to my goal I will move from " + currentNode.getId() + " to " + moveToNode.getId());
+			_actionNow = new GotoAction(moveToNode.getId(), _pathToDestinationGoal.size());
+			return;
 		}
 		
 		for(Node n : _graph.getAdjacentTo(currentNode)) {
@@ -120,9 +166,15 @@ public class SentinelAgent extends CustomAgent {
 			return;
 		}
 		
-		// PLAN SURVEY
+		act = planSurvey(currentNode);
+		if(act != null) {
+			_actionNow = act;
+			return;
+		}
 		
-		_actionNow = MarsUtil.parryAction();
+		
+		
+		_actionNow = MarsUtil.rechargeAction();
 	}
 
 	@Override
@@ -134,8 +186,24 @@ public class SentinelAgent extends CustomAgent {
 	}
 	
 	private Action planSurvey(Node node) {
-		// TODO
 		if(!PlanningCenter.proceed(SharedUtil.Actions.Survey, node.getId())) return null;
+		
+		HashSet<String> checkedNodes = new HashSet<String>();
+		Queue<Node> toCheck = new Queue<Node>();
+		toCheck.enqueue(node);
+		
+		for(Node n : _graph.getAdjacentTo(node)){
+			if(checkedNodes.contains(n.getId())) continue;
+			checkedNodes.add(n.getId());
+			Edge e = _graph.getEdgeFromNodes(node, n);
+			if(!e.isSurveyed()) return new SurveyAction(node.getId());
+			
+			for(Node n2 : _graph.getAdjacentTo(n)){
+				Edge e2 = _graph.getEdgeFromNodes(n, n2);
+				if(!e2.isSurveyed()) return new SurveyAction(node.getId());
+				
+			}
+		}
 		
 		return null;
 	}

@@ -51,7 +51,7 @@ public class AgentMonitor {
 			
 			JButton updateButton = new JButton("Update");
 			updateButton.addActionListener(new ActionListener(){
-				@Override
+				//@Override
 				public void actionPerformed(ActionEvent e) {
 					update();
 					updateThread.interrupt();

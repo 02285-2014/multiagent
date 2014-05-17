@@ -216,7 +216,7 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 	 * @see apltk.interpreter.Interpreter#addEnvironment(eis.EnvironmentInterfaceStandard)
 	 */
 	// agents are instantiated here.
-	@Override
+	////@Override
 	public void addEnvironment(EnvironmentInterfaceStandard ei) {
 		
 		Agent.setEnvironmentInterface(ei);
@@ -253,13 +253,13 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 		System.out.println("free entities: " + ei.getFreeEntities());
 	}
 
-	@Override
+	//@Override
 	public Collection<String> getAgents() {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Belief> getBeliefBase(String agent) {
 		for (Agent ag : agents.values()) {
 			if (ag.getName().equals(agent)) return new LinkedList<Belief>(ag.getBeliefBase());
@@ -267,19 +267,19 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Coalition> getCoalitions() {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Event> getEventBase(String agent) {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Goal> getGoalBase(String agent) {
 		for ( Agent ag : agents.values() ) {
 			
@@ -291,50 +291,50 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Message> getMessageBox(String agent) {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public String getName() {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Percept> getPerceptBase(String agent) {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public Collection<Plan> getPlanBase(String agent) {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public QueryCapabilities getQueryFlags() {
 		assert false : "Implement!";
 		return null;
 	}
 
-	@Override
+	//@Override
 	public void init(Element parameters) throws InterpreterException {
 		assert false : "Implement!";
 	}
 
-	@Override
+	//@Override
 	public void release() {
 		assert false : "Implement!";
 	}
 
-	@Override
+	//@Override
 	public void setBasePath(String basePath) { }
 
-	@Override
+	//@Override
 	public StepResult step() {
 
 		// execute each agent one step
@@ -392,20 +392,20 @@ public class AgentsInterpreter implements Interpreter,AgentListener,EnvironmentL
 	}
 
 
-	@Override
+	//@Override
 	public void handleNewEntity(String entity) { }
 
-	@Override
+	//@Override
 	public void handleStateChange(EnvironmentState newState) { }
 
-	@Override
+	//@Override
 	public void handlePercept(String agent, eis.iilang.Percept percept) {
 		agents.get(agent).handlePercept(percept);
 	}
 
-	@Override
+	//@Override
 	public void handleFreeEntity(String entity, Collection<String> agents) { }
 
-	@Override
+	//@Override
 	public void handleDeletedEntity(String entity, Collection<String> agents) { }
 }

@@ -31,13 +31,13 @@
     <entity name="connectionA28" username="a28" password="1" iilang="yes" xml="yes"/>-->
     
     <entity name="connectionB1" username="b1" password="1" iilang="yes" xml="no"/>
-    <entity name="connectionB2" username="b2" password="1" iilang="yes" xml="no"/>
+    <!--<entity name="connectionB2" username="b2" password="1" iilang="yes" xml="no"/>
     <entity name="connectionB3" username="b3" password="1" iilang="yes" xml="no"/>
     <entity name="connectionB4" username="b4" password="1" iilang="yes" xml="no"/>
     <entity name="connectionB5" username="b5" password="1" iilang="yes" xml="no"/>
     <entity name="connectionB6" username="b6" password="1" iilang="yes" xml="no"/>
     <entity name="connectionB7" username="b7" password="1" iilang="yes" xml="no"/>
-    <entity name="connectionB8" username="b8" password="1" iilang="yes" xml="no"/>
+    <entity name="connectionB8" username="b8" password="1" iilang="yes" xml="no"/>-->
     <!--<entity name="connectionB9" username="b9" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionB10" username="b10" password="1" iilang="yes" xml="yes"/>
     <entity name="connectionB11" username="b11" password="1" iilang="yes" xml="yes"/>
