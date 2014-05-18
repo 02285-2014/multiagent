@@ -70,7 +70,9 @@ public class SharedUtil {
 		public static final String Survey = "survey";
 		
 		public class Custom {
+			public static final String GoToAndAttack = "gotoANDattack";
 			public static final String GoToAndProbe = "gotoANDprobe";
+			public static final String GoToAndRepair = "gotoANDrepair";
 		}
 	}
 }

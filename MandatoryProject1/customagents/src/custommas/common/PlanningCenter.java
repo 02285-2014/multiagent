@@ -10,12 +10,17 @@ import eis.iilang.Action;
 
 //Andreas (s092638)
 //Morten (s133304)
+//Peter (s113998)
 
 public class PlanningCenter {
 	private static Map<String, AgentAction> _probePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _surveyPlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _goToAndProbePlan = new HashMap<String, AgentAction>();
 	private static Map<String, AgentAction> _inspectPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _repairPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _goToAndRepairPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _attackPlan = new HashMap<String, AgentAction>();
+	private static Map<String, AgentAction> _goToAndAttackPlan = new HashMap<String, AgentAction>();
 	
 	private static final HashMap<String, Map<String, AgentAction>> _actionToPlan;
 	static{
@@ -24,11 +29,17 @@ public class PlanningCenter {
 		_actionToPlan.put(SharedUtil.Actions.Survey, _surveyPlan);
 		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndProbe, _goToAndProbePlan);
 		_actionToPlan.put(SharedUtil.Actions.Inspect, _inspectPlan);
+		_actionToPlan.put(SharedUtil.Actions.Repair, _repairPlan);
+		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndRepair, _goToAndRepairPlan);
+		_actionToPlan.put(SharedUtil.Actions.Attack, _attackPlan);
+		_actionToPlan.put(SharedUtil.Actions.Custom.GoToAndAttack, _goToAndAttackPlan);
 	}
 	
 	private static final HashSet<String> bestOnlyActions = SharedUtil.newHashSetFromArray(new String[] {
 		ProbeAction.class.getSimpleName(), SurveyAction.class.getSimpleName(),
-		GotoAndProbeAction.class.getSimpleName(), InspectAction.class.getSimpleName()
+		GotoAndProbeAction.class.getSimpleName(), InspectAction.class.getSimpleName(),
+		RepairAction.class.getSimpleName(), GotoAndRepairAction.class.getSimpleName(),
+		AttackAction.class.getSimpleName(), GotoAndAttackAction.class.getSimpleName()
 	});
 	
 	private static Queue<CustomAgent> _replanRequired = new Queue<CustomAgent>();
@@ -135,9 +146,77 @@ public class PlanningCenter {
 				aa.weight = inspectAction.isRanged() ? 1 : 0;
 				_inspectPlan.put(inspectAction.getNodeId(), aa);
 			}
-		}
 		
-		if(agentToPing != null){
+		}else if(action instanceof RepairAction){
+			RepairAction repairAction = (RepairAction)action;
+			if(_repairPlan.containsKey(repairAction.getAgent())){
+				agentToPing = agent;
+			}else{
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = repairAction.getName();
+				aa.target = repairAction.getAgent().getName();
+				_repairPlan.put(repairAction.getAgent().getPosition(), aa);
+			}
+
+		}else if(action instanceof GotoAndRepairAction){
+			GotoAndRepairAction garAction = (GotoAndRepairAction)action;
+			if(_repairPlan.containsKey(garAction.getNodeId())){
+				agentToPing = agent;
+			}else if(_goToAndRepairPlan.containsKey(garAction.getGoalNodeId())){
+				AgentAction aa = _goToAndRepairPlan.get(garAction.getGoalNodeId());
+				if(garAction.getSteps() < aa.weight){
+					agentToPing = aa.agent;
+				}else{
+					agentToPing = agent;
+				}
+			}
+			if(agentToPing != agent){
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = garAction.getName();
+				aa.target = garAction.getNodeId();
+				aa.weight = garAction.getSteps();
+				_goToAndRepairPlan.put(garAction.getGoalNodeId(), aa);
+			}
+
+		}else if(action instanceof AttackAction){
+			AttackAction attackAction = (AttackAction)action;
+			if(_attackPlan.containsKey(attackAction.getAgent())){
+				agentToPing = agent;
+			}else{
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = attackAction.getName();
+				aa.target = attackAction.getAgent().getName();
+				_attackPlan.put(attackAction.getAgent().getName(), aa);
+			}
+
+		}else if(action instanceof GotoAndAttackAction){
+			GotoAndAttackAction gaaAction = (GotoAndAttackAction)action;
+			if(_attackPlan.containsKey(gaaAction.getNodeId())){
+				agentToPing = agent;
+			}else if(_goToAndAttackPlan.containsKey(gaaAction.getGoalNodeId())){
+				AgentAction aa = _goToAndAttackPlan.get(gaaAction.getGoalNodeId());
+				if(gaaAction.getSteps() < aa.weight){
+					agentToPing = aa.agent;
+				}else{
+					agentToPing = agent;
+				}	
+			}
+
+			if(agentToPing != agent){
+				AgentAction aa = new AgentAction();
+				aa.agent = agent;
+				aa.action = gaaAction.getName();
+				aa.target = gaaAction.getNodeId();
+				aa.weight = gaaAction.getSteps();
+				_goToAndAttackPlan.put(gaaAction.getGoalNodeId(), aa);
+			}
+
+		}
+
+	if(agentToPing != null){
 			_replanRequired.enqueue(agentToPing);
 		}
 	}
