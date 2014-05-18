@@ -1,10 +1,10 @@
 package custommas.agents.actions;
 
-import massim.javaagents.agents.MarsUtil;
 import custommas.common.SharedUtil;
 import eis.iilang.Action;
 import eis.iilang.Identifier;
 
+@SuppressWarnings("serial")
 public class InspectAction extends Action {
 	private String _nodeId;
 	private String _agentToInspect;

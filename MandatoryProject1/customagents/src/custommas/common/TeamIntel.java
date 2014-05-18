@@ -7,7 +7,6 @@ import eis.iilang.Parameter;
 import eis.iilang.Percept;
 
 import apltk.interpreter.data.LogicBelief;
-import apltk.interpreter.data.Message;
 
 //Andreas (s092638)
 
@@ -19,8 +18,6 @@ public class TeamIntel {
 	private String[] _parameters;
 	private String _sender = null;
 	private int _typeIs = 0;
-	
-	private TeamIntel(){}
 	
 	public TeamIntel (LogicBelief belief){
 		_name = belief.getPredicate();
