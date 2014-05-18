@@ -109,22 +109,22 @@ public class Node implements Comparable<Node> {
 		}
 	}
 	
-	@Override
+	//@Override
 	public boolean equals(Object o) {
 		return o instanceof Node && this.getId().equals(((Node)o).getId());
 	}
 	
-	@Override
+	//@Override
 	public int hashCode(){
 		return _id.hashCode();
 	}
 	
-	@Override
+	//@Override
 	public String toString(){
 		return "Node(" + _id + ")";
 	}
 
-	@Override
+	//@Override
 	public int compareTo(Node o) {
 		return Integer.compare(_value, o._value);
 	}
