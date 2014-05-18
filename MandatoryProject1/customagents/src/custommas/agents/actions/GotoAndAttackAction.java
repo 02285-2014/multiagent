@@ -5,9 +5,10 @@ public class GotoAndAttackAction extends GotoAction {
 	private String _goalNodeId;
 	private int _steps;
 	
-	public GotoAndAttackAction(String nextNodeId, String goalNodeId, int steps) {
-		super(nextNodeId, steps);
+	public GotoAndAttackAction(String nextNodeId, String goalNodeId, int weight, int steps) {
+		super(nextNodeId, weight);
 		_goalNodeId = goalNodeId;
+		_steps = steps;
 	}		
 	
 	public String getGoalNodeId(){

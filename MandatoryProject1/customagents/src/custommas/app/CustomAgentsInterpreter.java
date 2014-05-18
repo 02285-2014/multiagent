@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import massim.javaagents.Agent;
+import custommas.common.DistressCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.lib.Node;
@@ -14,6 +15,7 @@ import custommas.lib.SimpleGraph;
 import custommas.lib.algo.ComponentMaximumSum;
 import custommas.lib.algo.ConnectedComponent;
 import custommas.agents.CustomAgent;
+import custommas.agents.RepairerAgent;
 import eis.exceptions.ActException;
 import eis.iilang.Action;
 import eis.iilang.Parameter;
@@ -37,6 +39,8 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 	@Override
 	public StepResult step(){
 		_step = PlanningCenter.newStep(_step + 1);
+		DistressCenter.newStep();
+		
 		if(!SharedKnowledge.zoneControlMode() && _step >= _zoneControlModeStepStart){
 			System.out.println("ZONE CONTROL ENABLED!");
 			SharedKnowledge.enableZoneControlMode();
@@ -44,9 +48,13 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 		System.out.println("Step " + _step);
 		
 		ArrayList<CustomAgent> agentList = new ArrayList<CustomAgent>();
+		ArrayList<RepairerAgent> repairerList = new ArrayList<RepairerAgent>();
 		for (Agent ag : agents.values()) {
 			if(ag instanceof CustomAgent){
 				agentList.add((CustomAgent)ag);
+				if(ag instanceof RepairerAgent){
+					repairerList.add((RepairerAgent)ag);
+				}
 			}else{
 				Action act = ag.step();
 				if(act != null){
@@ -104,6 +112,12 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 			// Make them plan their next action.
 			for(int i = 0; i < agentList.size(); i++){
 				agentList.get(i).planNewAction();
+			}
+			
+			if(repairerList.size() > 0 && DistressCenter.getDistressedAgents().size() > 0){
+				for(RepairerAgent ag : repairerList){
+					ag.planNewAction();
+				}
 			}
 			
 			while(PlanningCenter.getReplanningAgentsCount() > 0 && PlanningCenter.getPlanningTimeSpendInMillis() < _timeoutSkip){

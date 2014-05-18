@@ -129,8 +129,8 @@ public class PlanningCenter {
 			
 		}else if(action instanceof InspectAction){
 			InspectAction inspectAction = (InspectAction)action;
-			if(_inspectPlan.containsKey(inspectAction.getNodeId())){
-				AgentAction aa = _inspectPlan.get(inspectAction.getNodeId());
+			if(_inspectPlan.containsKey(inspectAction.getTarget())){
+				AgentAction aa = _inspectPlan.get(inspectAction.getTarget());
 				if(!inspectAction.isRanged() && aa.weight > 0){
 					agentToPing = aa.agent;
 				}else{
@@ -142,29 +142,30 @@ public class PlanningCenter {
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = inspectAction.getName();
-				aa.target = inspectAction.getNodeId();
+				aa.target = inspectAction.getTarget();
 				aa.weight = inspectAction.isRanged() ? 1 : 0;
-				_inspectPlan.put(inspectAction.getNodeId(), aa);
+				_inspectPlan.put(inspectAction.getTarget(), aa);
 			}
 		
 		}else if(action instanceof RepairAction){
 			RepairAction repairAction = (RepairAction)action;
-			if(_repairPlan.containsKey(repairAction.getAgent())){
+			if(_repairPlan.containsKey(repairAction.getAgent().getName())){
 				agentToPing = agent;
 			}else{
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = repairAction.getName();
 				aa.target = repairAction.getAgent().getName();
-				_repairPlan.put(repairAction.getAgent().getPosition(), aa);
+				aa.weight = 0;
+				_repairPlan.put(repairAction.getAgent().getName(), aa);
 			}
 
 		}else if(action instanceof GotoAndRepairAction){
 			GotoAndRepairAction garAction = (GotoAndRepairAction)action;
-			if(_repairPlan.containsKey(garAction.getNodeId())){
+			if(_repairPlan.containsKey(garAction.getAgent().getName())){
 				agentToPing = agent;
-			}else if(_goToAndRepairPlan.containsKey(garAction.getGoalNodeId())){
-				AgentAction aa = _goToAndRepairPlan.get(garAction.getGoalNodeId());
+			}else if(_goToAndRepairPlan.containsKey(garAction.getAgent().getName())){
+				AgentAction aa = _goToAndRepairPlan.get(garAction.getAgent().getName());
 				if(garAction.getSteps() < aa.weight){
 					agentToPing = aa.agent;
 				}else{
@@ -175,9 +176,9 @@ public class PlanningCenter {
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = garAction.getName();
-				aa.target = garAction.getNodeId();
+				aa.target = garAction.getAgent().getName();
 				aa.weight = garAction.getSteps();
-				_goToAndRepairPlan.put(garAction.getGoalNodeId(), aa);
+				_goToAndRepairPlan.put(garAction.getAgent().getName(), aa);
 			}
 
 		}else if(action instanceof AttackAction){
@@ -189,6 +190,7 @@ public class PlanningCenter {
 				aa.agent = agent;
 				aa.action = attackAction.getName();
 				aa.target = attackAction.getAgent().getName();
+				aa.weight = 0;
 				_attackPlan.put(attackAction.getAgent().getName(), aa);
 			}
 

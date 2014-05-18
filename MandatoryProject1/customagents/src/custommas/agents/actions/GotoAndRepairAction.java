@@ -1,20 +1,23 @@
 package custommas.agents.actions;
 
+import custommas.agents.CustomAgent;
+
 @SuppressWarnings("serial")
 public class GotoAndRepairAction extends GotoAction {
-	private String _goalNodeId;
 	private int _steps;
+	private CustomAgent _agent;
 	
-	public GotoAndRepairAction(String nextNodeId, String goalNodeId, int steps) {
-		super(nextNodeId, steps);
-		_goalNodeId = goalNodeId;
+	public GotoAndRepairAction(String nextNodeId, CustomAgent agent, int weight, int steps) {
+		super(nextNodeId, weight);
+		_steps = steps;
+		_agent = agent;
 	}		
-	
-	public String getGoalNodeId(){
-		return _goalNodeId;
-	}
 
 	public int getSteps(){
 		return _steps;
+	}
+	
+	public CustomAgent getAgent(){
+		return _agent;
 	}
 }

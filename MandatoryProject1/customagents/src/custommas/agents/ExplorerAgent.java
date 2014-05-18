@@ -7,7 +7,7 @@ import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
 import custommas.lib.Node;
 import custommas.lib.Stack;
-import custommas.lib.algo.BreadthFirstExplorerSearch;
+import custommas.lib.algo.BreadthFirstSearch;
 import custommas.lib.interfaces.INodePredicate;
 
 import eis.iilang.Action;
@@ -15,9 +15,7 @@ import massim.javaagents.agents.MarsUtil;
 
 // Andreas (s092638)
 
-public class ExplorerAgent extends CustomAgent{
-	private BreadthFirstExplorerSearch _unprobedSearch;
-	
+public class ExplorerAgent extends CustomAgent{	
 	private INodePredicate unprobedPredicate = new INodePredicate(){
 		public boolean evaluate(Node node, int comparableValue) {
 			return !node.isProbed() 
@@ -81,41 +79,33 @@ public class ExplorerAgent extends CustomAgent{
 		
 		if(!SharedKnowledge.zoneControlMode()){
 			if(_actionRound == 3){
-				_unprobedSearch = new BreadthFirstExplorerSearch(_graph);
-				Node moveToNode = _unprobedSearch.findClosestUnexploredNodeUsingPredicate(currentNode, unprobedPredicate);
+				BreadthFirstSearch unprobedSearch = new BreadthFirstSearch(_graph);
+				Node moveToNode = unprobedSearch.findClosestNodeSatisfyingPredicate(currentNode, unprobedPredicate);
 			
-				if(moveToNode == null){
-					println("No unprobed node found!");
-					_actionRound = 4;
-				}else{
-					act = planNextUnprobed(_position, moveToNode);
+				if(moveToNode != null){
+					act = planNextUnprobed(unprobedSearch, _position, moveToNode);
 					if(act != null){
 						_actionNow = act;
 						return;
-					}else{
-						println("Couldn't find path to unprobed node!");
-						_actionRound = 4;
 					}
 				}
+				_actionRound = 4;
 			}
 		} else {
 			if(_actionRound == 3){
 				if(SharedKnowledge.getMaxSumComponent() != null && SharedKnowledge.getMaxSumComponent().getNodes().contains(currentNode)){
-					_unprobedSearch = new BreadthFirstExplorerSearch(SharedKnowledge.getMaxSumComponent().getGraph());
-					Node moveToNode = _unprobedSearch.findClosestUnexploredNodeUsingPredicate(currentNode, unprobedPredicate);
+					BreadthFirstSearch unprobedSearch = new BreadthFirstSearch(SharedKnowledge.getMaxSumComponent().getGraph());
+					Node moveToNode = unprobedSearch.findClosestNodeSatisfyingPredicate(currentNode, unprobedPredicate);
 				
-					if(moveToNode == null){
-						_actionRound = 4;
-					}else{
-						act = planNextUnprobed(_position, moveToNode);
+					if(moveToNode != null){
+						act = planNextUnprobed(unprobedSearch, _position, moveToNode);
 						if(act != null){
 							_actionNow = act;
 							return;
-						}else{
-							_actionRound = 4;
 						}
 					}
 				}
+				_actionRound = 4;
 			}
 		}
 		
@@ -128,9 +118,9 @@ public class ExplorerAgent extends CustomAgent{
 				? new ProbeAction(node.getId()) : null;
 	}
 	
-	private Action planNextUnprobed(String position, Node firstUnprobed) {
+	private Action planNextUnprobed(BreadthFirstSearch unprobedSearch, String position, Node firstUnprobed) {
 		if(firstUnprobed != null){
-			Stack<Node> pathToUnprobed = _unprobedSearch.pathTo(firstUnprobed);
+			Stack<Node> pathToUnprobed = unprobedSearch.pathTo(firstUnprobed);
 			if(pathToUnprobed.size() > 1){
 				if(pathToUnprobed.peek().getId().equals(position)){
 					pathToUnprobed.pop();

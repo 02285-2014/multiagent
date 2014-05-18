@@ -35,4 +35,8 @@ public class InspectAction extends Action {
 	public boolean isRanged(){
 		return _ranged;
 	}
+	
+	public String getTarget(){
+		return _agentToInspect.length() > 0 ? _agentToInspect : _nodeId;
+	}
 }

@@ -12,24 +12,24 @@ import custommas.lib.interfaces.INodePredicate;
 
 //Andreas (s092638)
 
-public class BreadthFirstExplorerSearch {
+public class BreadthFirstSearch {
     private HashSet<Node> marked; // marked[v] = is there an s-v path
     private HashMap<Node, Node> edgeTo; // edgeTo[v] = previous edge on shortest s-v path
     private Graph graph;
 
-    public BreadthFirstExplorerSearch(Graph g) {
+    public BreadthFirstSearch(Graph g) {
     	this.graph = g;
     }
     
     public Node findClosestUnexploredNode(Node startNode){
-    	return findClosestUnexploredNodeUsingPredicate(startNode, new INodePredicate(){
+    	return findClosestNodeSatisfyingPredicate(startNode, new INodePredicate(){
     		public boolean evaluate(Node node, int comparableValue){
     			return !node.isProbed();
     		}
     	});
     }
     
-    public Node findClosestUnexploredNodeUsingPredicate(Node startNode, INodePredicate predicate){
+    public Node findClosestNodeSatisfyingPredicate(Node startNode, INodePredicate predicate){
     	marked = new HashSet<Node>();
         edgeTo = new HashMap<Node, Node>();
         marked.add(startNode);

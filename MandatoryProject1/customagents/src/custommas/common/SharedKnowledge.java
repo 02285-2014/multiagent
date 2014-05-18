@@ -53,6 +53,10 @@ public class SharedKnowledge {
 		return _agents.values();
 	}
 	
+	public static CustomAgent getCustomAgent(String name){
+		return _agents.get(name);
+	}
+	
 	public static OpponentAgent getOpponentAgent(String name){
 		OpponentAgent agent = _opponents.get(name);
 		if(agent != null) return agent;

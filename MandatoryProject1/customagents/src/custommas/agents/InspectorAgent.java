@@ -77,25 +77,20 @@ public class InspectorAgent extends CustomAgent {
 	}
 	
 	private Action planInspect(Node node){
-		Collection<OccupyInfo> opponents = null;
+		Collection<OccupyInfo> opponents = node.getOccupantsForTeam(SharedKnowledge.OpponentTeam);
 		
-		if(PlanningCenter.proceed(SharedUtil.Actions.Inspect, node.getId(), 0)){
-			opponents = node.getOccupantsForTeam(SharedKnowledge.OpponentTeam);
-			for(OccupyInfo info : opponents){
-				if(!SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()){
-					return new InspectAction(node.getId());
-				}
-			}
+		for(OccupyInfo info : opponents){
+			if(!PlanningCenter.proceed(SharedUtil.Actions.Inspect, info.getAgentName(), 0)) continue;
+			if(SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()) continue;
+			return new InspectAction(node.getId());
 		}
 		
 		for(Node n : _graph.getAdjacentTo(node)){
-			if(!PlanningCenter.proceed(SharedUtil.Actions.Inspect, n.getId(), 1)) continue;
-			
 			opponents = n.getOccupantsForTeam(SharedKnowledge.OpponentTeam);
 			for(OccupyInfo info : opponents){
-				if(!SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()){
-					return new InspectAction(n.getId(), info.getAgentName());
-				}
+				if(!PlanningCenter.proceed(SharedUtil.Actions.Inspect, info.getAgentName(), 1)) continue;
+				if(SharedKnowledge.getOpponentAgent(info.getAgentName()).inspected()) continue;
+				return new InspectAction(n.getId(), info.getAgentName());
 			}
 		}
 		
