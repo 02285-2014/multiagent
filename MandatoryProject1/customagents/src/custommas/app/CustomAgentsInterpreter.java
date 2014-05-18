@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import massim.javaagents.Agent;
-import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.lib.Node;
@@ -14,9 +13,7 @@ import custommas.lib.Queue;
 import custommas.lib.SimpleGraph;
 import custommas.lib.algo.ComponentMaximumSum;
 import custommas.lib.algo.ConnectedComponent;
-import custommas.lib.algo.GraphMiscAlg;
 import custommas.agents.CustomAgent;
-import custommas.agents.ExplorerAgent;
 import eis.exceptions.ActException;
 import eis.iilang.Action;
 import eis.iilang.Parameter;
@@ -44,7 +41,7 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 			System.out.println("ZONE CONTROL ENABLED!");
 			SharedKnowledge.enableZoneControlMode();
 		}
-		System.out.println("Step " + _step + ", Messages " + MessageCenter.totalMessages());
+		System.out.println("Step " + _step);
 		
 		ArrayList<CustomAgent> agentList = new ArrayList<CustomAgent>();
 		for (Agent ag : agents.values()) {

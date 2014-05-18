@@ -13,8 +13,7 @@ import apltk.interpreter.data.Message;
 
 public class TeamIntel {
 	private static final int TypeIsBelief = 0;
-	private static final int TypeIsMessage = 1;
-	private static final int TypeIsPercept = 2;
+	private static final int TypeIsPercept = 1;
 	
 	private String _name = null;
 	private String[] _parameters;
@@ -33,12 +32,6 @@ public class TeamIntel {
 			_parameters[i++] = param;
 		}
 		_typeIs = TypeIsBelief;
-	}
-	
-	public TeamIntel(Message message){
-		this((LogicBelief)message.value);
-		_sender = message.sender;
-		_typeIs = TypeIsMessage;
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -74,20 +67,7 @@ public class TeamIntel {
 		return _typeIs == TypeIsBelief;
 	}
 	
-	public boolean isMessage(){
-		return _typeIs == TypeIsMessage;
-	}
-	
 	public boolean isPercept(){
 		return _typeIs == TypeIsPercept;
-	}
-	
-	public TeamIntel asMessage(String sender){
-		TeamIntel ti = new TeamIntel();
-		ti._name = _name;
-		ti._parameters = _parameters;
-		ti._sender = sender;
-		ti._typeIs = TypeIsMessage;
-		return ti;
 	}
 }

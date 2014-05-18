@@ -2,27 +2,12 @@ package custommas.agents;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import custommas.agents.actions.GotoAction;
-import custommas.agents.actions.GotoAndProbeAction;
-import custommas.agents.actions.ProbeAction;
-import custommas.agents.actions.SurveyAction;
-import custommas.common.MessageCenter;
-import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
-import custommas.common.TeamIntel;
-import custommas.lib.Edge;
-import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.Node;
-import custommas.lib.Queue;
-import custommas.lib.Stack;
-import custommas.lib.algo.BreadthFirstExplorerSearch;
-import custommas.lib.algo.Dijkstra;
-import custommas.lib.interfaces.INodePredicate;
-
 import eis.iilang.Action;
 import massim.javaagents.agents.MarsUtil;
 

@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import custommas.agents.actions.*;
-import custommas.common.MessageCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
@@ -51,13 +50,10 @@ public abstract class CustomAgent extends Agent {
 	private String _destinationGoal;
 	private List<Node> _pathToDestinationGoal;
 	
-	protected static final HashSet<String> validMessages;
 	protected static final HashSet<String> validPercepts;
 	private static final boolean _debug = true;
 	
 	static {
-		// No longer in use, might have to use it again for part 3
-		validMessages = SharedUtil.newHashSetFromArray(new String[] { });
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
 			"visibleVertex", "visibleEdge", "visibleEntity", "probedVertex", "surveyedEdge",
 			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement",
@@ -98,10 +94,6 @@ public abstract class CustomAgent extends Agent {
 		_actionRound = 0;
 		
 		List<TeamIntel> intel = new LinkedList<TeamIntel>();
-		for(TeamIntel message : MessageCenter.getMessages(this)){
-			intel.add(message);
-		}
-		
 		for(Percept percept : getAllPercepts()){
 			intel.add(new TeamIntel(percept));
 		}
@@ -165,11 +157,7 @@ public abstract class CustomAgent extends Agent {
 			if(intel.isBelief()) continue;
 			
 			// Skip messages that are irrelevant
-			if(intel.isMessage()){
-				if(!validMessages.contains(intel.getName())) continue;
-			}else{
-				if(!validPercepts.contains(intel.getName())) continue;
-			}
+			if(!validPercepts.contains(intel.getName())) continue;
 			
 			boolean newKnowledge = false;
 			String[] params = intel.getParameters();
@@ -267,10 +255,6 @@ public abstract class CustomAgent extends Agent {
 				SharedKnowledge.setZoneScore(zoneScore);
 			}else if(intel.getName().equals("lastActionResult")){
 				_actionLastResult = params[0];
-			}
-			
-			if(newKnowledge && intel.isPercept() && validMessages.contains(intel.getName())){
-				MessageCenter.broadcastMessage(intel.asMessage(_name));
 			}
 		}
 	}
@@ -484,32 +468,18 @@ public abstract class CustomAgent extends Agent {
 		return _role;
 	}
 	
+	public boolean isDisabled(){
+		return _health < 1;
+	}
+	
 	@Override
 	protected Collection<Percept> getAllPercepts() {
-		
 		try {
 			Map<String, Collection<Percept>> percepts = getEnvironmentInterface().getAllPercepts(getName());
 			Collection<Percept> ret = new LinkedList<Percept>();
 			for ( Collection<Percept> ps : percepts.values() ) {
 				ret.addAll(ps);
-			}
-			
-			// sweep mental attitudes if there has been a restart 
-//			int step = -1;
-//			for ( Percept p : ret ) {
-//				if ( p.getName().equals("step")) {
-//					step = new Integer(p.getParameters().get(0).toProlog()).intValue();
-//					break;
-//				}
-//			}
-//			if ( step != -1 && step < oldStep) {
-//				println("sweeping mental attitudes");
-//				beliefs.clear();
-//				goals.clear();
-//			}
-//			if ( step != -1 )
-//				oldStep = step;
-			
+			}			
 			return ret;
 		} catch (PerceiveException e) {
 			//e.printStackTrace();
@@ -520,7 +490,6 @@ public abstract class CustomAgent extends Agent {
 			println("error perceiving \"" + e.getMessage() + "\"");	
 			return new LinkedList<Percept>();
 		}
-		
 	}
 	
 	@Override
