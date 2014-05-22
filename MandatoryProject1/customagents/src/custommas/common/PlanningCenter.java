@@ -1,8 +1,12 @@
 package custommas.common;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Iterator;
+
+import custommas.agents.AgentAction;
 import custommas.agents.CustomAgent;
 import custommas.agents.actions.*;
 import custommas.lib.Queue;
@@ -158,6 +162,11 @@ public class PlanningCenter {
 				aa.target = repairAction.getAgent().getName();
 				aa.weight = 0;
 				_repairPlan.put(repairAction.getAgent().getName(), aa);
+				
+				if(_goToAndRepairPlan.containsKey(repairAction.getAgent())){
+					AgentAction gapAction = _goToAndRepairPlan.remove(repairAction.getAgent());
+					agentToPing = gapAction.agent;
+				}
 			}
 
 		}else if(action instanceof GotoAndRepairAction){
@@ -178,12 +187,12 @@ public class PlanningCenter {
 				aa.action = garAction.getName();
 				aa.target = garAction.getAgent().getName();
 				aa.weight = garAction.getSteps();
-				_goToAndRepairPlan.put(garAction.getAgent().getName(), aa);
+				_goToAndRepairPlan.put(garAction.getGoalNodeId(), aa);
 			}
 
 		}else if(action instanceof AttackAction){
 			AttackAction attackAction = (AttackAction)action;
-			if(_attackPlan.containsKey(attackAction.getAgent())){
+			if(_attackPlan.containsKey(attackAction.getAgent().getName())){
 				agentToPing = agent;
 			}else{
 				AgentAction aa = new AgentAction();
@@ -241,6 +250,23 @@ public class PlanningCenter {
 		return _replanRequired.size();
 	}
 	
+	public static String helpAt(CustomAgent agent){
+		if(_goToAndRepairPlan.size()>0){
+			Iterator iterator = _goToAndRepairPlan.entrySet().iterator();
+			while(iterator.hasNext()){
+				Map.Entry  mapEntry = (Map.Entry) iterator.next();
+				if(mapEntry.getValue().target.equals(agent.getName())){
+					return mapEntry.getKey();
+				}
+			}
+		}		
+		return null;
+	}
+	
+	public static boolean isNextHelpAtNode(String nodeId){
+		return _goToAndRepairPlan.containsKey(nodeId);  
+	}
+
 	public static Queue<CustomAgent> getReplanningAgents(){
 		Queue<CustomAgent> current = _replanRequired;
 		_replanRequired = new Queue<CustomAgent>();

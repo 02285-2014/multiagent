@@ -1,10 +1,12 @@
 package custommas.agents;
 
+//Andreas (s092638)
+//Peter (s113998)
+
 import java.util.Collection;
 
-import custommas.agents.actions.GotoAndProbeAction;
-import custommas.agents.actions.GotoAndRepairAction;
 import custommas.agents.actions.RepairAction;
+import custommas.agents.actions.GotoAndRepairAction;
 import custommas.common.DistressCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
@@ -48,6 +50,23 @@ public class RepairerAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
+		if (!SharedKnowledge.zoneControlMode() &&
+				this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThreshold){
+			DistressCenter.requestHelp(this);
+			
+			if(DistressCenter.AgentGettingHelp(this)){
+				String gettingHelpAt = PlanningCenter.helpAt(this);
+				if(gettingHelpAt != null){
+					gotoNode(gettingHelpAt);
+				}
+			} else {
+				if (!SharedKnowledge.zoneControlMode() &&
+						this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThresholdLow){
+					gotoNode(DistressCenter.findNearestNextHelp());
+				}
+			}
+		}
+
 		act = planRecharge(3);
 		if (act != null){
 			_actionNow = act;
@@ -84,14 +103,17 @@ public class RepairerAgent extends CustomAgent {
 				if(agentToRepair != null){
 					if(moveToNode.getId().equals(_position)){
 						act = new RepairAction(agentToRepair);
+						if(act != null){
+							DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
+							_actionNow = act;
+							return;
+						}
 					}else{
 						act = planDistressHelp(distressedSearch, _position, moveToNode, agentToRepair);
-					}
-					
-					if(act != null){
-						DistressCenter.respondToHelp(((RepairAction)act).getAgent());
-						_actionNow = act;
-						return;
+						if(act != null){
+							_actionNow = act;
+							return;
+						}
 					}
 				}
 			}
@@ -123,17 +145,38 @@ public class RepairerAgent extends CustomAgent {
 	}
 	
 	private Action planDistressHelp(BreadthFirstSearch distressedSearch, String position, Node distressedAgentNode, CustomAgent agentToRepair) {
+		Node nodeHelpAt = distressedAgentNode;
 		if(distressedAgentNode != null){
 			Stack<Node> pathDistressed = distressedSearch.pathTo(distressedAgentNode);
 			if(pathDistressed.size() > 1){
 				if(pathDistressed.peek().getId().equals(position)){
 					pathDistressed.pop();
 				}
-				return new GotoAndRepairAction(
-						pathDistressed.peek().getId(), 
+				Node goal = pathDistressed.peek();
+				if (!SharedKnowledge.zoneControlMode()){
+					int stepsToHalfWay;
+					nodeHelpAt = pathDistressed.peek();
+					if(pathDistressed.size() % 2 == 0){
+						stepsToHalfWay = pathDistressed.size()/2;
+					}else{
+						stepsToHalfWay = (pathDistressed.size()+1)/2;					
+					}
+					for(int step=1; step<stepsToHalfWay; step++){
+						nodeHelpAt = pathDistressed.pop();
+					}
+				} else {
+					nodeHelpAt = distressedAgentNode;
+				}
+				Action act = new GotoAndRepairAction(
+						goal.getId(), 
 						agentToRepair, 
-						_graph.getEdgeFromNodeIds(position, pathDistressed.peek().getId()).getWeight(), 
+						nodeHelpAt.getId(),
+						_graph.getEdgeFromNodeIds(position, goal.getId()).getWeight(),  // weight for whole path
 						pathDistressed.size());
+				if(act != null){
+					DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
+					return act;
+				}
 			}
 		}
 		
