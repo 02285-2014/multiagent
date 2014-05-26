@@ -50,7 +50,8 @@ public class RepairerAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
-		if (!SharedKnowledge.zoneControlMode() &&
+		// Forklar denne
+		/*if (!SharedKnowledge.zoneControlMode() &&
 				this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThreshold){
 			DistressCenter.requestHelp(this);
 			
@@ -65,7 +66,7 @@ public class RepairerAgent extends CustomAgent {
 					gotoNode(DistressCenter.findNearestNextHelp());
 				}
 			}
-		}
+		}*/
 
 		act = planRecharge(3);
 		if (act != null){
@@ -103,17 +104,13 @@ public class RepairerAgent extends CustomAgent {
 				if(agentToRepair != null){
 					if(moveToNode.getId().equals(_position)){
 						act = new RepairAction(agentToRepair);
-						if(act != null){
-							DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
-							_actionNow = act;
-							return;
-						}
+						DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
 					}else{
 						act = planDistressHelp(distressedSearch, _position, moveToNode, agentToRepair);
-						if(act != null){
-							_actionNow = act;
-							return;
-						}
+					}
+					if(act != null){
+						_actionNow = act;
+						return;
 					}
 				}
 			}
@@ -152,27 +149,24 @@ public class RepairerAgent extends CustomAgent {
 				if(pathDistressed.peek().getId().equals(position)){
 					pathDistressed.pop();
 				}
-				Node goal = pathDistressed.peek();
+				
 				if (!SharedKnowledge.zoneControlMode()){
-					int stepsToHalfWay;
+					int stepsToHalfWay = (pathDistressed.size()+1)/2;
 					nodeHelpAt = pathDistressed.peek();
-					if(pathDistressed.size() % 2 == 0){
-						stepsToHalfWay = pathDistressed.size()/2;
-					}else{
-						stepsToHalfWay = (pathDistressed.size()+1)/2;					
-					}
 					for(int step=1; step<stepsToHalfWay; step++){
 						nodeHelpAt = pathDistressed.pop();
 					}
 				} else {
 					nodeHelpAt = distressedAgentNode;
 				}
+				
 				Action act = new GotoAndRepairAction(
-						goal.getId(), 
+						pathDistressed.peek().getId(), 
 						agentToRepair, 
 						nodeHelpAt.getId(),
-						_graph.getEdgeFromNodeIds(position, goal.getId()).getWeight(),  // weight for whole path
+						_graph.getEdgeFromNodeIds(position, pathDistressed.peek().getId()).getWeight(),
 						pathDistressed.size());
+				
 				if(act != null){
 					DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
 					return act;

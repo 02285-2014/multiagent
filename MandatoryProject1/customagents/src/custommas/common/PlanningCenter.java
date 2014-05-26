@@ -1,12 +1,8 @@
 package custommas.common;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Iterator;
-
-import custommas.agents.AgentAction;
 import custommas.agents.CustomAgent;
 import custommas.agents.actions.*;
 import custommas.lib.Queue;
@@ -153,28 +149,23 @@ public class PlanningCenter {
 		
 		}else if(action instanceof RepairAction){
 			RepairAction repairAction = (RepairAction)action;
-			if(_repairPlan.containsKey(repairAction.getAgent().getName())){
+			if(_repairPlan.containsKey(repairAction.getAgentToRepair().getName())){
 				agentToPing = agent;
 			}else{
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = repairAction.getName();
-				aa.target = repairAction.getAgent().getName();
+				aa.target = repairAction.getAgentToRepair().getName();
 				aa.weight = 0;
-				_repairPlan.put(repairAction.getAgent().getName(), aa);
-				
-				if(_goToAndRepairPlan.containsKey(repairAction.getAgent())){
-					AgentAction gapAction = _goToAndRepairPlan.remove(repairAction.getAgent());
-					agentToPing = gapAction.agent;
-				}
+				_repairPlan.put(repairAction.getAgentToRepair().getName(), aa);
 			}
 
 		}else if(action instanceof GotoAndRepairAction){
 			GotoAndRepairAction garAction = (GotoAndRepairAction)action;
-			if(_repairPlan.containsKey(garAction.getAgent().getName())){
+			if(_repairPlan.containsKey(garAction.getAgentToRepair().getName())){
 				agentToPing = agent;
-			}else if(_goToAndRepairPlan.containsKey(garAction.getAgent().getName())){
-				AgentAction aa = _goToAndRepairPlan.get(garAction.getAgent().getName());
+			}else if(_goToAndRepairPlan.containsKey(garAction.getAgentToRepair().getName())){
+				AgentAction aa = _goToAndRepairPlan.get(garAction.getAgentToRepair().getName());
 				if(garAction.getSteps() < aa.weight){
 					agentToPing = aa.agent;
 				}else{
@@ -185,22 +176,22 @@ public class PlanningCenter {
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = garAction.getName();
-				aa.target = garAction.getAgent().getName();
+				aa.target = garAction.getAgentToRepair().getName();
 				aa.weight = garAction.getSteps();
-				_goToAndRepairPlan.put(garAction.getGoalNodeId(), aa);
+				_goToAndRepairPlan.put(garAction.getAgentToRepair().getName(), aa);
 			}
 
 		}else if(action instanceof AttackAction){
 			AttackAction attackAction = (AttackAction)action;
-			if(_attackPlan.containsKey(attackAction.getAgent().getName())){
+			if(_attackPlan.containsKey(attackAction.getAgentToAttack())){
 				agentToPing = agent;
 			}else{
 				AgentAction aa = new AgentAction();
 				aa.agent = agent;
 				aa.action = attackAction.getName();
-				aa.target = attackAction.getAgent().getName();
+				aa.target = attackAction.getAgentToAttack().getName();
 				aa.weight = 0;
-				_attackPlan.put(attackAction.getAgent().getName(), aa);
+				_attackPlan.put(attackAction.getAgentToAttack().getName(), aa);
 			}
 
 		}else if(action instanceof GotoAndAttackAction){
@@ -250,23 +241,6 @@ public class PlanningCenter {
 		return _replanRequired.size();
 	}
 	
-	public static String helpAt(CustomAgent agent){
-		if(_goToAndRepairPlan.size()>0){
-			Iterator iterator = _goToAndRepairPlan.entrySet().iterator();
-			while(iterator.hasNext()){
-				Map.Entry  mapEntry = (Map.Entry) iterator.next();
-				if(mapEntry.getValue().target.equals(agent.getName())){
-					return mapEntry.getKey();
-				}
-			}
-		}		
-		return null;
-	}
-	
-	public static boolean isNextHelpAtNode(String nodeId){
-		return _goToAndRepairPlan.containsKey(nodeId);  
-	}
-
 	public static Queue<CustomAgent> getReplanningAgents(){
 		Queue<CustomAgent> current = _replanRequired;
 		_replanRequired = new Queue<CustomAgent>();
