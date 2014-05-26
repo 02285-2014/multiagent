@@ -69,6 +69,12 @@ public class ExplorerAgent extends CustomAgent{
 			}
 		}
 		
+		act = planGoToGoal(currentNode);
+		if(act != null){
+			_actionNow = act;
+			return;
+		}
+		
 		if(_actionRound == 2){
 			_actionRound = 3;
 			if(!isDisabled()){
@@ -78,12 +84,6 @@ public class ExplorerAgent extends CustomAgent{
 					return;
 				}
 			}
-		}
-		
-		act = planGoToGoal(currentNode);
-		if(act != null){
-			_actionNow = act;
-			return;
 		}
 		
 		if(!SharedKnowledge.zoneControlMode()){
