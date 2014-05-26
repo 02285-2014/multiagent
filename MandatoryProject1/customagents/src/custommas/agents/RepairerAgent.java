@@ -107,6 +107,9 @@ public class RepairerAgent extends CustomAgent {
 						DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
 					}else{
 						act = planDistressHelp(distressedSearch, _position, moveToNode, agentToRepair);
+						if(act != null){
+							DistressCenter.respondToHelp(((GotoAndRepairAction)act).getAgentToRepair());
+						}
 					}
 					if(act != null){
 						_actionNow = act;
@@ -150,7 +153,7 @@ public class RepairerAgent extends CustomAgent {
 					pathDistressed.pop();
 				}
 				
-				if (!SharedKnowledge.zoneControlMode()){
+				/*if (!SharedKnowledge.zoneControlMode()){
 					int stepsToHalfWay = (pathDistressed.size()+1)/2;
 					nodeHelpAt = pathDistressed.peek();
 					for(int step=1; step<stepsToHalfWay; step++){
@@ -158,7 +161,7 @@ public class RepairerAgent extends CustomAgent {
 					}
 				} else {
 					nodeHelpAt = distressedAgentNode;
-				}
+				}*/
 				
 				Action act = new GotoAndRepairAction(
 						pathDistressed.peek().getId(), 
@@ -166,11 +169,6 @@ public class RepairerAgent extends CustomAgent {
 						nodeHelpAt.getId(),
 						_graph.getEdgeFromNodeIds(position, pathDistressed.peek().getId()).getWeight(),
 						pathDistressed.size());
-				
-				if(act != null){
-					DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
-					return act;
-				}
 			}
 		}
 		

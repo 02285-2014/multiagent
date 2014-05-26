@@ -47,6 +47,14 @@ public class PlanningCenter {
 	private static int _stepCounter = 0;
 	private static long _stepTime = System.currentTimeMillis();
 	
+	public static void newGame(){
+		if(_stepCounter != 1){
+			_stepCounter = 1;
+			SharedKnowledge.reset();
+			System.out.println("New Game - Reset knowledge!");
+		}
+	}
+	
 	public static int getStep(){
 		return _stepCounter;
 	}

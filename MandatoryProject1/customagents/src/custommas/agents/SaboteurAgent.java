@@ -2,6 +2,7 @@ package custommas.agents;
 
 import java.util.Set;
 
+import custommas.common.DistressCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
 import custommas.lib.Node;
@@ -18,17 +19,21 @@ public class SaboteurAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
-		act = planRecharge(3);
-		if (act != null){
-			_actionNow = act;
-			return;
+		if(!isDisabled()){
+			act = planRecharge(3);
+			if (act != null){
+				_actionNow = act;
+				return;
+			}
+		}else{
+			DistressCenter.requestHelp(this);
 		}
 		
 		Node currentNode = _graph.getNode(_position);
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = MarsUtil.parryAction();
+			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
 			return;
 		}
 		
@@ -38,16 +43,20 @@ public class SaboteurAgent extends CustomAgent {
 			return;
 		}
 		
-		Set<OpponentAgent> nearbyOpponents = super.nearbyOpponents(currentNode, 1);
-		if(nearbyOpponents.size() > 0){
-			_actionNow = MarsUtil.attackAction(SharedUtil.any(nearbyOpponents).getName());
-			return;
+		if(!isDisabled()){
+			Set<OpponentAgent> nearbyOpponents = super.nearbyOpponents(currentNode, 1);
+			if(nearbyOpponents.size() > 0){
+				_actionNow = MarsUtil.attackAction(SharedUtil.any(nearbyOpponents).getName());
+				return;
+			}
 		}
 		
-		act = planSurvey(currentNode, _visibilityRange * 3);
-		if (act != null){
-			_actionNow = act;
-			return;
+		if(!isDisabled()){
+			act = planSurvey(currentNode, _visibilityRange * 3);
+			if (act != null){
+				_actionNow = act;
+				return;
+			}
 		}
 		
 		if(!SharedKnowledge.zoneControlMode()){
@@ -58,6 +67,6 @@ public class SaboteurAgent extends CustomAgent {
 			}
 		}
 		
-		_actionNow = MarsUtil.parryAction();
+		_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
 	}
 }

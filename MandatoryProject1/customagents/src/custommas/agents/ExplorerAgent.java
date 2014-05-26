@@ -2,6 +2,7 @@ package custommas.agents;
 
 import custommas.agents.actions.GotoAndProbeAction;
 import custommas.agents.actions.ProbeAction;
+import custommas.common.DistressCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
 import custommas.common.SharedUtil;
@@ -37,10 +38,14 @@ public class ExplorerAgent extends CustomAgent{
 		if(_actionRound < 1){
 			_actionRound = 1;
 			
-			act = planRecharge(1.0/3.0);
-			if (act != null){
-				_actionNow = act;
-				return;
+			if(!isDisabled()){
+				act = planRecharge(1.0/3.0);
+				if (act != null){
+					_actionNow = act;
+					return;
+				}
+			}else{
+				DistressCenter.requestHelp(this);
 			}
 		}
 		
@@ -49,25 +54,29 @@ public class ExplorerAgent extends CustomAgent{
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = MarsUtil.rechargeAction();
+			_actionNow = !isDisabled() ? MarsUtil.rechargeAction() : MarsUtil.skipAction();
 			return;
 		}
 		
 		if(_actionRound == 1){
 			_actionRound = 2;
-			act = planProbe(currentNode);
-			if (act != null){
-				_actionNow = act;
-				return;
+			if(!isDisabled()){
+				act = planProbe(currentNode);
+				if (act != null){
+					_actionNow = act;
+					return;
+				}
 			}
 		}
 		
 		if(_actionRound == 2){
 			_actionRound = 3;
-			act = planSurvey(currentNode, _visibilityRange * 3);
-			if (act != null){
-				_actionNow = act;
-				return;
+			if(!isDisabled()){
+				act = planSurvey(currentNode, SharedKnowledge.zoneControlMode() ? 1 : _visibilityRange * 3);
+				if (act != null){
+					_actionNow = act;
+					return;
+				}
 			}
 		}
 		
@@ -109,7 +118,10 @@ public class ExplorerAgent extends CustomAgent{
 			}
 		}
 		
-		act = planRecharge();
+		if(!isDisabled()){
+			act = planRecharge();
+		}
+		
 		_actionNow = act != null ? act : MarsUtil.skipAction();
 	}
 	

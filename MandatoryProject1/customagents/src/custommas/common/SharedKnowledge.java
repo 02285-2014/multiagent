@@ -12,8 +12,8 @@ import custommas.lib.algo.ConnectedComponent;
 //Andreas (s092638)
 
 public class SharedKnowledge {
-	public static final String OurTeam = "A";
-	public static final String OpponentTeam = "B";
+	public static String OurTeam = "A";
+	public static String OpponentTeam = "B";
 	private static Map<String, CustomAgent> _agents = new HashMap<String, CustomAgent>();
 	private static Map<String, OpponentAgent> _opponents = new HashMap<String, OpponentAgent>();
 	private static boolean _zoneControlMode = false;
@@ -47,6 +47,10 @@ public class SharedKnowledge {
 	public static void addCustomAgent(CustomAgent agent){
 		if(_agents.containsKey(agent.getName())) return;
 		_agents.put(agent.getName(), agent);
+		if(!agent.getTeam().equals(OurTeam)){
+			OurTeam = agent.getTeam();
+			OpponentTeam = OurTeam.equals("A") ? "B" : "A";
+		}
 	}
 	
 	public static Collection<CustomAgent> getCustomAgents(){
@@ -87,5 +91,8 @@ public class SharedKnowledge {
 		_opponents = new HashMap<String, OpponentAgent>();
 		_zoneControlMode = false;
 		_maxSumComponent = null;
+		for(CustomAgent agent : _agents.values()){
+			agent.reset();
+		}
 	}
 }
