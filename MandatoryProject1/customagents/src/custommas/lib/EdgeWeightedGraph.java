@@ -10,7 +10,6 @@ public class EdgeWeightedGraph extends Graph {
 	private Map<String, Edge> _edges;
 	private Map<Node, Set<Node>> _adjacent;
 	private Map<String, String> _agentLocations;
-	private Set<String> _occupiedNodes;
 	private Set<String> _probedNodes;
 	
 	public EdgeWeightedGraph() {
@@ -18,7 +17,6 @@ public class EdgeWeightedGraph extends Graph {
 		_edges = new HashMap<String, Edge>();
 		_adjacent = new HashMap<Node, Set<Node>>();
 		_agentLocations = new HashMap<String, String>();
-		_occupiedNodes = new HashSet<String>();
 		_probedNodes = new HashSet<String>();
 	}
 	

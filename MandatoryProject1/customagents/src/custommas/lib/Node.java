@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import custommas.common.PlanningCenter;
+import custommas.common.SharedKnowledge;
 
 //Andreas (s092638)
 //Morten (s133304)
@@ -12,15 +13,15 @@ public class Node implements Comparable<Node> {
 	private static final int NonProbed = Integer.MIN_VALUE;
 	private String _id;
 	private int _value;
-	private HashMap<String, OccupyInfo> _occupantsTeamA;
-	private HashMap<String, OccupyInfo> _occupantsTeamB;
+	private HashMap<String, OccupyInfo> _occupantsOurTeam;
+	private HashMap<String, OccupyInfo> _occupantsOpponentTeam;
 	
 	public Node(String name) {
 		if(name == null) throw new NullPointerException("Name cannot be null");
 		_id = name;
 		_value = NonProbed;
-		_occupantsTeamA = new HashMap<String, OccupyInfo>();
-		_occupantsTeamB = new HashMap<String, OccupyInfo>();
+		_occupantsOurTeam = new HashMap<String, OccupyInfo>();
+		_occupantsOpponentTeam = new HashMap<String, OccupyInfo>();
 	}
 	
 	public Node(String name, int value) {
@@ -49,13 +50,13 @@ public class Node implements Comparable<Node> {
 		if(occupants < 1) return false;
 		if(occupants > 0 && amountOfStepsToLookBack < 1) return true;
 		
-		for(OccupyInfo nfo : _occupantsTeamA.values()){
+		for(OccupyInfo nfo : _occupantsOurTeam.values()){
 			if(nfo.getStepsAgo() <= amountOfStepsToLookBack){
 				return true;
 			}
 		}
 		
-		for(OccupyInfo nfo : _occupantsTeamB.values()){
+		for(OccupyInfo nfo : _occupantsOpponentTeam.values()){
 			if(nfo.getStepsAgo() <= amountOfStepsToLookBack){
 				return true;
 			}
@@ -65,22 +66,22 @@ public class Node implements Comparable<Node> {
 	}
 	
 	public int getNumberOfOccupants(){
-		return _occupantsTeamA.size() + _occupantsTeamB.size();
+		return _occupantsOurTeam.size() + _occupantsOpponentTeam.size();
 	}
 	
 	public int getNumberOfOccupantsForTeam(String agentTeam){
-		if(agentTeam.equals("A")){
-			return _occupantsTeamA.size();
+		if(agentTeam.equals(SharedKnowledge.OurTeam)){
+			return _occupantsOurTeam.size();
 		}else{
-			return _occupantsTeamB.size();
+			return _occupantsOpponentTeam.size();
 		}
 	}
 	
 	public Collection<OccupyInfo> getOccupantsForTeam(String agentTeam){
-		if(agentTeam.equals("A")){
-			return _occupantsTeamA.values();
+		if(agentTeam.equals(SharedKnowledge.OurTeam)){
+			return _occupantsOurTeam.values();
 		}else{
-			return _occupantsTeamB.values();
+			return _occupantsOpponentTeam.values();
 		}
 	}
 	
@@ -90,19 +91,19 @@ public class Node implements Comparable<Node> {
 	
 	public void addAgent(String agentName, String agentTeam){
 		if(agentTeam == null || agentTeam.length() < 1) return;
-		if(agentTeam.equals("A")){
-			_occupantsTeamA.put(agentName, new OccupyInfo(PlanningCenter.getStep(), agentName, agentTeam));
+		if(agentTeam.equals(SharedKnowledge.OurTeam)){
+			_occupantsOurTeam.put(agentName, new OccupyInfo(PlanningCenter.getStep(), agentName, agentTeam));
 		}else{
-			_occupantsTeamB.put(agentName, new OccupyInfo(PlanningCenter.getStep(), agentName, agentTeam));
+			_occupantsOpponentTeam.put(agentName, new OccupyInfo(PlanningCenter.getStep(), agentName, agentTeam));
 		}
 	}
 	
 	public void removeAgent(String agentName, String agentTeam){
 		if(agentTeam == null || agentTeam.length() < 1) return;
-		if(agentTeam.equals("A")){
-			_occupantsTeamA.remove(agentName);
+		if(agentTeam.equals(SharedKnowledge.OurTeam)){
+			_occupantsOurTeam.remove(agentName);
 		}else{
-			_occupantsTeamB.remove(agentName);
+			_occupantsOpponentTeam.remove(agentName);
 		}
 	}
 	
