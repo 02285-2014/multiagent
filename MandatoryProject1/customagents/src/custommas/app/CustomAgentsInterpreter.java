@@ -1,5 +1,10 @@
 package custommas.app;
 
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,11 +14,16 @@ import massim.javaagents.Agent;
 import custommas.common.DistressCenter;
 import custommas.common.PlanningCenter;
 import custommas.common.SharedKnowledge;
+import custommas.lib.algo.IsolatedSubgraph;
+import custommas.lib.EdgeWeightedGraph;
+import custommas.lib.Graph;
 import custommas.lib.Node;
 import custommas.lib.Queue;
 import custommas.lib.SimpleGraph;
+import custommas.lib.algo.SimulatedAnnealing;
 import custommas.lib.algo.ComponentMaximumSum;
 import custommas.lib.algo.ConnectedComponent;
+import custommas.lib.algo.Subgraph;
 import custommas.agents.CustomAgent;
 import custommas.agents.RepairerAgent;
 import eis.exceptions.ActException;
@@ -26,7 +36,7 @@ import apltk.core.StepResult;
 public class CustomAgentsInterpreter extends AgentsInterpreter {
 	private int _step = 0;
 	private static final int _timeoutSkip = 1900;
-	private static final int _zoneControlModeStepStart = 300;
+	private static final int _zoneControlModeStepStart = 100;
 	
 	public CustomAgentsInterpreter(){
 		super();
@@ -71,6 +81,7 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 				agentList.get(i).step();
 			}
 			
+			/*
 			if(SharedKnowledge.zoneControlMode()){
 				if(_step % 50 == 0){
 					SharedKnowledge.setMaxSumComponent(null);
@@ -81,13 +92,26 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 					System.out.println("[MAXSUMFIND]");
 					
 					int maxSize = agentList.size();
-					SimpleGraph sg = new SimpleGraph(SharedKnowledge.getGraph());
-					ConnectedComponent maxSumComponent = ComponentMaximumSum.getMaximumSumComponent(sg, maxSize);
+					//SimpleGraph sg = new SimpleGraph(SharedKnowledge.getGraph());
+					//ConnectedComponent maxSumComponent = ComponentMaximumSum.getMaximumSumComponent(sg, maxSize);
+					Node center = null;
+					Set<Node> subgraph = null;
+					EdgeWeightedGraph g = SharedKnowledge.getGraph();
+					for(Node n : g.getAllNodes()){
+						if(n.getValue() >= 6) {
+							center = n;
+						}
+					}
+					if(center != null) {
+						subgraph = IsolatedSubgraph.formSubGraph(center,maxSize);
+					}
 					long endTime = System.currentTimeMillis();
-					System.out.println("Found max sum component of size " + maxSumComponent.size() + ", with sum " + maxSumComponent.getSum() + " in " + (endTime - startTime) + " ms");
-					
+					//System.out.println("Found max sum component of size " + maxSumComponent.size() + ", with sum " + maxSumComponent.getSum() + " in " + (endTime - startTime) + " ms");
+					System.out.println("Found max sum component of size " + subgraph.size() + " in " + (endTime - startTime) + " ms");
 					List<CustomAgent> ags = new ArrayList<CustomAgent>(agentList);
-					Set<Node> zoneNodes = new HashSet<Node>(maxSumComponent.getNodes());
+					//Set<Node> zoneNodes = new HashSet<Node>(maxSumComponent.getNodes());
+					Set<Node> zoneNodes = null;
+					zoneNodes = subgraph;
 					
 					int i = 0;
 					for(i = ags.size() - 1; i >= 0; i--){
@@ -103,10 +127,57 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 						agentList.get(i++).gotoNode(n.getId());
 					}
 					
-					System.out.println("[MAXSUMNODES]: " + maxSumComponent.getNodes());
+					//System.out.println("[MAXSUMNODES]: " + maxSumComponent.getNodes());
+					System.out.println("[MAXSUMNODES]: " + subgraph);
 					
-					SharedKnowledge.setMaxSumComponent(maxSumComponent);
+					//SharedKnowledge.setMaxSumComponent(maxSumComponent);
+					SharedKnowledge.setZone(subgraph);
 				}
+			}*/
+			
+			if(SharedKnowledge.zoneControlMode()){
+				if(_step % 50 == 0){
+					//SharedKnowledge.setZone(null);
+				}
+				
+				if(SharedKnowledge.getZone() == null){
+					//try {
+					long startTime = System.currentTimeMillis();
+					System.out.println("[MAXSUMFIND]");
+					
+					int maxSize = agentList.size();
+					//SimpleGraph sg = new SimpleGraph(SharedKnowledge.getGraph());
+					//ConnectedComponent maxSumComponent = ComponentMaximumSum.getMaximumSumComponent(sg, maxSize);
+					Subgraph subgraph = SimulatedAnnealing.getSubgraph(maxSize);
+					long endTime = System.currentTimeMillis();
+					//System.out.println("Found max sum component of size " + maxSumComponent.size() + ", with sum " + maxSumComponent.getSum() + " in " + (endTime - startTime) + " ms");
+					System.out.println("Found max sum component of size " + subgraph.getDominated().size() + " in " + (endTime - startTime) + " ms");
+					List<CustomAgent> ags = new ArrayList<CustomAgent>(agentList);
+					//Set<Node> zoneNodes = new HashSet<Node>(maxSumComponent.getNodes());
+					Set<Node> zoneNodes = null;
+					zoneNodes = subgraph.getPlacements();
+					
+					int i = 0;
+					for(i = ags.size() - 1; i >= 0; i--){
+						if(zoneNodes.contains(ags.get(i).getNode())){
+							zoneNodes.remove(ags.get(i).getNode());
+							ags.remove(i);
+						}
+					}
+					
+					i = 0;
+					for(Node n : zoneNodes){
+						if(i >= ags.size()) break;
+						agentList.get(i++).gotoNode(n.getId());
+					}
+					
+					//System.out.println("[MAXSUMNODES]: " + maxSumComponent.getNodes());
+					System.out.println("[MAXSUMNODES]: " + subgraph.getPlacements());
+					System.out.println("[DOMINATEDNODES]: " + subgraph.getDominated());
+					//SharedKnowledge.setMaxSumComponent(maxSumComponent);
+					SharedKnowledge.setZone(subgraph);
+					} //catch(Exception e) {}
+				//}
 			}
 			
 			// Make them plan their next action.

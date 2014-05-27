@@ -3,11 +3,14 @@ package custommas.common;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import custommas.agents.CustomAgent;
 import custommas.agents.OpponentAgent;
 import custommas.lib.EdgeWeightedGraph;
 import custommas.lib.algo.ConnectedComponent;
+import custommas.lib.Node;
+import custommas.lib.algo.Subgraph;
 
 //Andreas (s092638)
 
@@ -17,6 +20,7 @@ public class SharedKnowledge {
 	private static Map<String, CustomAgent> _agents = new HashMap<String, CustomAgent>();
 	private static Map<String, OpponentAgent> _opponents = new HashMap<String, OpponentAgent>();
 	private static boolean _zoneControlMode = false;
+	private static Subgraph _zone;
 	
 	private static int _teamScore = 0;
 	private static int _zoneScore = 0;
@@ -38,6 +42,14 @@ public class SharedKnowledge {
 	
 	public static boolean zoneControlMode(){
 		return _zoneControlMode;
+	}
+	
+	public static void setZone(Subgraph zone) {
+		_zone = zone;
+	}
+	
+	public static Subgraph getZone() {
+		return _zone;
 	}
 	
 	public static void enableZoneControlMode(){

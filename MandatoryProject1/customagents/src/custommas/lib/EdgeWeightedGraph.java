@@ -3,6 +3,7 @@ package custommas.lib;
 import java.util.*;
 
 //Andreas (s092638)
+//Morten (s133304)
 
 public class EdgeWeightedGraph extends Graph {
 	private Map<String, Node> _nodes;

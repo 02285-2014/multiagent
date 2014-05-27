@@ -6,6 +6,7 @@ import java.util.HashMap;
 import custommas.common.PlanningCenter;
 
 //Andreas (s092638)
+//Morten (s133304)
 
 public class Node implements Comparable<Node> {
 	private static final int NonProbed = Integer.MIN_VALUE;

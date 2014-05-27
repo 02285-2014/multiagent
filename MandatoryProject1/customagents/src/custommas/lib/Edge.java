@@ -1,6 +1,7 @@
 package custommas.lib;
 
 //Andreas (s092638)
+//Morten (s133304)
 
 public class Edge implements Comparable<Edge> {
 	public static final int NonSurveyed = Integer.MAX_VALUE;
