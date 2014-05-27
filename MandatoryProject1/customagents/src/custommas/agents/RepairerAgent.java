@@ -49,23 +49,6 @@ public class RepairerAgent extends CustomAgent {
 	@Override
 	protected void planAction() {
 		Action act = null;
-		
-		if (!SharedKnowledge.zoneControlMode() &&
-				this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThreshold){
-			DistressCenter.requestHelp(this);
-			
-			if(DistressCenter.AgentGettingHelp(this)){
-				String gettingHelpAt = PlanningCenter.helpAt(this);
-				if(gettingHelpAt != null){
-					gotoNode(gettingHelpAt);
-				}
-			} else {
-				if (!SharedKnowledge.zoneControlMode() &&
-						this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThresholdLow){
-					gotoNode(DistressCenter.findNearestNextHelp());
-				}
-			}
-		}
 
 		act = planRecharge(3);
 		if (act != null){
@@ -77,7 +60,7 @@ public class RepairerAgent extends CustomAgent {
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = MarsUtil.parryAction();
+			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.rechargeAction();
 			return;
 		}
 		
@@ -103,17 +86,16 @@ public class RepairerAgent extends CustomAgent {
 				if(agentToRepair != null){
 					if(moveToNode.getId().equals(_position)){
 						act = new RepairAction(agentToRepair);
-						if(act != null){
-							DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
-							_actionNow = act;
-							return;
-						}
+						DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
 					}else{
 						act = planDistressHelp(distressedSearch, _position, moveToNode, agentToRepair);
 						if(act != null){
-							_actionNow = act;
-							return;
+							DistressCenter.respondToHelp(((GotoAndRepairAction)act).getAgentToRepair());
 						}
+					}
+					if(act != null){
+						_actionNow = act;
+						return;
 					}
 				}
 			}
@@ -127,10 +109,12 @@ public class RepairerAgent extends CustomAgent {
 			return;
 		}
 		
-		act = planSurvey(currentNode, _visibilityRange * 3);
-		if (act != null){
-			_actionNow = act;
-			return;
+		if(!isDisabled()){
+			act = planSurvey(currentNode, SharedKnowledge.zoneControlMode() ? 1 : _visibilityRange * 3);
+			if (act != null){
+				_actionNow = act;
+				return;
+			}
 		}
 		
 		if(!SharedKnowledge.zoneControlMode()){
@@ -141,7 +125,7 @@ public class RepairerAgent extends CustomAgent {
 			}
 		}
 		
-		_actionNow = MarsUtil.parryAction();
+		_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
 	}
 	
 	private Action planDistressHelp(BreadthFirstSearch distressedSearch, String position, Node distressedAgentNode, CustomAgent agentToRepair) {
@@ -152,31 +136,15 @@ public class RepairerAgent extends CustomAgent {
 				if(pathDistressed.peek().getId().equals(position)){
 					pathDistressed.pop();
 				}
-				Node goal = pathDistressed.peek();
-				if (!SharedKnowledge.zoneControlMode()){
-					int stepsToHalfWay;
-					nodeHelpAt = pathDistressed.peek();
-					if(pathDistressed.size() % 2 == 0){
-						stepsToHalfWay = pathDistressed.size()/2;
-					}else{
-						stepsToHalfWay = (pathDistressed.size()+1)/2;					
-					}
-					for(int step=1; step<stepsToHalfWay; step++){
-						nodeHelpAt = pathDistressed.pop();
-					}
-				} else {
-					nodeHelpAt = distressedAgentNode;
-				}
+				
 				Action act = new GotoAndRepairAction(
-						goal.getId(), 
+						pathDistressed.peek().getId(), 
 						agentToRepair, 
 						nodeHelpAt.getId(),
-						_graph.getEdgeFromNodeIds(position, goal.getId()).getWeight(),  // weight for whole path
+						_graph.getEdgeFromNodeIds(position, pathDistressed.peek().getId()).getWeight(),
 						pathDistressed.size());
-				if(act != null){
-					DistressCenter.respondToHelp(((RepairAction)act).getAgentToRepair());
-					return act;
-				}
+				
+				return act;
 			}
 		}
 		

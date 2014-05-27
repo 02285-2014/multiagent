@@ -84,10 +84,6 @@ public class Node implements Comparable<Node> {
 		}
 	}
 	
-	public String getOwnerTeam(){
-		return _occupantsTeamA.size() > _occupantsTeamB.size() ? "A" : _occupantsTeamA.size() < _occupantsTeamB.size() ? "B" : "None";
-	}
-	
 	public boolean isProbed(){
 		return _value != NonProbed;
 	}

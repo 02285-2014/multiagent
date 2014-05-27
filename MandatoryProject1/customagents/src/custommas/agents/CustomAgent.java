@@ -51,13 +51,13 @@ public abstract class CustomAgent extends Agent {
 	private List<Node> _pathToDestinationGoal;
 	
 	protected static final HashSet<String> validPercepts;
-	private static final boolean _debug = true;
+	private static final boolean _debug = !true;
 	
 	static {
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
 			"visibleVertex", "visibleEdge", "visibleEntity", "probedVertex", "surveyedEdge",
 			"health", "maxHealth", "position", "energy", "maxEnergy", "money", "achievement",
-			"inspectedEntity", "score", "zonesScore", "lastActionResult"
+			"inspectedEntity", "score", "zonesScore", "lastActionResult", "step"
 		});
 	}
 	
@@ -152,6 +152,8 @@ public abstract class CustomAgent extends Agent {
 	
 	protected void handleIntel(List<TeamIntel> intelList){
 		_position = null;
+		int knownStep = PlanningCenter.getStep();
+		
 		for(TeamIntel intel : intelList){
 			// For now skip belief-only-intel
 			if(intel.isBelief()) continue;
@@ -159,10 +161,18 @@ public abstract class CustomAgent extends Agent {
 			// Skip messages that are irrelevant
 			if(!validPercepts.contains(intel.getName())) continue;
 			
-			boolean newKnowledge = false;
 			String[] params = intel.getParameters();
 			
-			if(intel.getName().equals("visibleVertex")){
+			if(intel.getName().equals("step")){
+				if(params.length < 1) continue;
+				int realStep = Integer.parseInt(params[0]);
+				if(realStep == 0 && knownStep > 1){
+					PlanningCenter.newGame();
+					// Should run again to ensure that intel is added to the new graph
+					handleIntel(intelList);
+					return;
+				}
+			}else if(intel.getName().equals("visibleVertex")){
 				if(params.length < 2) continue;
 				String nodeId = params[0];
 				
@@ -452,6 +462,10 @@ public abstract class CustomAgent extends Agent {
 		return _health == _maxHealth;
 	}
 	
+	public double getHealthRatio(){
+		return (double)_health / (double)_maxHealth;
+	}
+	
 	public int getEnergy(){
 		return _energy;
 	}
@@ -469,7 +483,19 @@ public abstract class CustomAgent extends Agent {
 	}
 	
 	public boolean isDisabled(){
-		return _health < 1;
+		return _health < 1 && _maxHealth > 0;
+	}
+	
+	public void reset(){
+		_health = 0;
+		_maxHealth = 0;
+		_energy = 0;
+		_maxEnergy = 0;
+		_position = null;
+		_graph = SharedKnowledge.getGraph();
+		_innerGoals = new HashSet<String>();
+		_destinationGoal = null;
+		_pathToDestinationGoal = null;
 	}
 	
 	@Override
