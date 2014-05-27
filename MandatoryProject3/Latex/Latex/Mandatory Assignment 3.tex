@@ -6,6 +6,7 @@
 \usepackage{enumerate}
 \usepackage{float}
 \usepackage{latexsym}
+\usepackage{marginnote}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{amsfonts}
@@ -21,6 +22,7 @@
 \usepackage{colortbl}
 \parindent=0pt
 \frenchspacing
+\reversemarginpar
 
 \pagestyle{fancy}
 
@@ -68,40 +70,123 @@ Peter \textsc{Carlslund}\\
 \end{center}
 \end{titlepage}
 
+${}$
+\vspace{-.55cm}
 \section{Introduction}
+\marginpar{\tt Andreas \& \\ Morten}
+Short introduction about the course, where we are taking it.
+
+\subsection{Scenario}
+\marginpar{\tt Andreas \& \\ Morten}
+Short short short scenario description.
 
 \subsection{Problems}
+\marginpar{\tt Andreas \& \\ Morten}
+The problems to overcome, maybe we should list a problem for each agent a long with some common problems.
 
 \section{Environment}
+\marginpar{\tt Andreas}
+Short introduction of the environment (map to be explored, knowledge to be shared, agents needing to communictate)...
 
 \subsection{Map}
+\marginpar{\tt Andreas}
+Explain that the environment is represented as an edge weighted graph, nodes has to be probed, edges has to be surveyed etc.
+
 \subsection{Knowledge}
+\marginpar{\tt Andreas}
+Explain that all knowledge is shared among the agents.
+
 \subsection{Communication}
+\marginpar{\tt Andreas}
+Explain that the agents use their shared knowledge to perceive the world, but they communicate when in need of help
+
+\section{Strategy}
+\marginpar{\tt Morten}
+Something short about what our initial strategies have been for the game. We split up the game in two modes, exploring and zone controlling.
+
+\subsection{Mapping}
+\marginpar{\tt Andreas}
+Something about who does what while mapping.
+
+\subsection{Zone Control Mode}
+\marginpar{\tt Morten}
+Something about what zone control mode is, why we do it etc.
 
 \section{Agents}
+\marginpar{\tt Andreas}
+Some general stuff about the agents here. Mentioning there are five different types etc.
 
 \subsection{Agent Base}
+\marginpar{\tt Andreas}
+Something about the {\tt CustomAgent} that all the agents derive from, explaining that some of the logic is used within all the agents.
 
 \subsection{Explorer Agent}
+\marginpar{\tt Andreas}
+The job of the explorer agent, how we solve it and what it does during zone control mode etc.
 
 \subsection{Inspector Agent}
+\marginpar{\tt Andreas}
+The job of the inspector agent, how we solve it and what it does during zone control mode etc.
 
 \subsection{Repairer Agent}
+\marginpar{\tt Andreas \& \\Peter}
+The job of the repairer agent, how we solve it and what it does during zone control mode etc.
 
 \subsection{Saboteur Agent}
+\marginpar{\tt Andreas \& \\Peter}
+The job of the saboteur agent, how we solve it and what it does during zone control mode etc.
 
 \subsection{Sentinel Agent}
+\marginpar{\tt Morten}
+The job of the sentinel agent, how we solve it and what it does during zone control mode etc.
+
+\section{Planning}
+\marginpar{\tt Andreas}
+Introduction to planning.
+
+\subsection{Planning Center}
+\marginpar{\tt Andreas}
+Explain that some actions are only to be performed by one agent, that they "bid" on actions etc.
+
+\subsection{Distress Center}
+\marginpar{\tt Andreas}
+Explain that agents can call for help, that repairers respond and that the distress center works with the planning center.
 
 \section{Zone Control}
+\marginpar{\tt Morten}
+What is zone controlling, what is a good zone.
 
 \subsection{Algorithms}
+\marginpar{\tt Andreas \& \\ Morten}
+Thoughts about how to get a good zone.
+
 \subsubsection{Isolated Subgraph}
+\marginpar{\tt Morten}
+Pick a big node, expand around it.
+
 \subsubsection{Max Sum Component}
+\marginpar{\tt Andreas}
+Find connected components, take the one with maximum sum of specific size.
+
 \subsubsection{Simmulated Annealing}
+\marginpar{\tt Morten}
+Something super smart and awesome here!
+
 \subsubsection{Comparison}
+\marginpar{\tt Morten}
+Input real test numbers here!
 
 \subsection{Guarding The Zone}
+\marginpar{\tt Morten}
+What does it mean to guard a zone, how do we plan to do it.
 
 \section{Conclusion}
+\marginpar{\tt Andreas \& \\ Morten \& \\ Peter}
+Conclude on the problems, state that we solved most of them if not all.
+
+\subsection{Flaws}
+\marginpar{\tt Peter}
+A shit load of flaws in our solution and hopefully how to remedy them had we had more time!
+
 
 \end{document}
