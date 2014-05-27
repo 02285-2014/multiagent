@@ -50,7 +50,7 @@ public class Subgraph {
 					for(Node neighbour : SharedKnowledge.getGraph().getAdjacentTo(n)) {
 						if(!neighbour.equals(newPlace) && _placements.contains(neighbour)) {
 							System.out.println(neighbour+" IS NOW DOMINATED");
-							newDominatedNodes.add(neighbour);
+							newDominatedNodes.add(n);
 							break;
 						}
 					}
@@ -60,6 +60,8 @@ public class Subgraph {
 				_dominated.add(n);
 			}
 		} else {
+			_dominated.remove(oldPlace);
+			System.out.println(oldPlace + " IS NO LONGER DOMINATED");
 			_score = _score - oldPlaceValue;
 		}
 	}

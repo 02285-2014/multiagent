@@ -36,7 +36,7 @@ import apltk.core.StepResult;
 public class CustomAgentsInterpreter extends AgentsInterpreter {
 	private int _step = 0;
 	private static final int _timeoutSkip = 1900;
-	private static final int _zoneControlModeStepStart = 100;
+	private static final int _zoneControlModeStepStart = 150;
 	
 	public CustomAgentsInterpreter(){
 		super();
