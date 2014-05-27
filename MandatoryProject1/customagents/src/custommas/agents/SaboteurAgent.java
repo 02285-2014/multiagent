@@ -51,7 +51,7 @@ public class SaboteurAgent extends CustomAgent {
 			Set<OpponentAgent> nearbyOpponents = super.nearbyOpponents(currentNode, 1);
 			while(nearbyOpponents.size() > 0){
 				OpponentAgent toAttack = SharedUtil.any(nearbyOpponents);
-				if(_lastAgentAttacked != null || (_lastAgentAttacked.equals(toAttack.getName()) && _attackRepeatCurrent <= _attackRepeatMax)){
+				if(_lastAgentAttacked == null || (_lastAgentAttacked.equals(toAttack.getName()) && _attackRepeatCurrent <= _attackRepeatMax)){
 					_lastAgentAttacked = toAttack.getName();
 					_attackRepeatCurrent++;
 					_actionNow = MarsUtil.attackAction(_lastAgentAttacked);

@@ -137,16 +137,6 @@ public class RepairerAgent extends CustomAgent {
 					pathDistressed.pop();
 				}
 				
-				/*if (!SharedKnowledge.zoneControlMode()){
-					int stepsToHalfWay = (pathDistressed.size()+1)/2;
-					nodeHelpAt = pathDistressed.peek();
-					for(int step=1; step<stepsToHalfWay; step++){
-						nodeHelpAt = pathDistressed.pop();
-					}
-				} else {
-					nodeHelpAt = distressedAgentNode;
-				}*/
-				
 				Action act = new GotoAndRepairAction(
 						pathDistressed.peek().getId(), 
 						agentToRepair, 

@@ -51,7 +51,7 @@ public abstract class CustomAgent extends Agent {
 	private List<Node> _pathToDestinationGoal;
 	
 	protected static final HashSet<String> validPercepts;
-	private static final boolean _debug = true;
+	private static final boolean _debug = !true;
 	
 	static {
 		validPercepts = SharedUtil.newHashSetFromArray(new String[] {
