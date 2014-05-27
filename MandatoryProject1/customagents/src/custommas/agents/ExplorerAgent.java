@@ -1,5 +1,8 @@
 package custommas.agents;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import custommas.agents.actions.GotoAndProbeAction;
 import custommas.agents.actions.ProbeAction;
 import custommas.common.DistressCenter;
@@ -20,6 +23,15 @@ public class ExplorerAgent extends CustomAgent{
 	private INodePredicate unprobedPredicate = new INodePredicate(){
 		public boolean evaluate(Node node, int comparableValue) {
 			return !node.isProbed() 
+					&& PlanningCenter.proceed(SharedUtil.Actions.Custom.GoToAndProbe, node.getId(), comparableValue)
+					&& PlanningCenter.proceed(SharedUtil.Actions.Probe, node.getId(), 1);
+		}
+	};
+	
+	private Set<Node> _specificUnprobed = null;
+	private INodePredicate unprobedSpecificPredicate = new INodePredicate(){
+		public boolean evaluate(Node node, int comparableValue) {
+			return _specificUnprobed != null && _specificUnprobed.contains(node)
 					&& PlanningCenter.proceed(SharedUtil.Actions.Custom.GoToAndProbe, node.getId(), comparableValue)
 					&& PlanningCenter.proceed(SharedUtil.Actions.Probe, node.getId(), 1);
 		}
@@ -102,9 +114,17 @@ public class ExplorerAgent extends CustomAgent{
 			}
 		} else {
 			if(_actionRound == 3){
-				if(SharedKnowledge.getMaxSumComponent() != null && SharedKnowledge.getMaxSumComponent().getNodes().contains(currentNode)){
-					BreadthFirstSearch unprobedSearch = new BreadthFirstSearch(SharedKnowledge.getMaxSumComponent().getGraph());
-					Node moveToNode = unprobedSearch.findClosestNodeSatisfyingPredicate(currentNode, unprobedPredicate);
+				//if(SharedKnowledge.getMaxSumComponent() != null && SharedKnowledge.getMaxSumComponent().getNodes().contains(currentNode)){
+				if(SharedKnowledge.getZone() != null && SharedKnowledge.getZone().getDominated().contains(currentNode)){
+					_specificUnprobed = new HashSet<Node>();
+					for(Node n : SharedKnowledge.getZone().getDominated()){
+						if(!n.isProbed()){
+							_specificUnprobed.add(n);
+						}
+					}
+					
+					BreadthFirstSearch unprobedSearch = new BreadthFirstSearch(_graph);
+					Node moveToNode = unprobedSearch.findClosestNodeSatisfyingPredicate(currentNode, unprobedSpecificPredicate);
 				
 					if(moveToNode != null){
 						act = planNextUnprobed(unprobedSearch, _position, moveToNode);

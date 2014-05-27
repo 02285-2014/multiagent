@@ -103,6 +103,10 @@ public class RepairerAgent extends CustomAgent {
 		
 		_actionRound = 1;
 		
+		if(_destinationGoal == null && _lastGoalReached != null && !_position.equals(_lastGoalReached)){
+			gotoNode(_lastGoalReached);
+		}
+		
 		act = planGoToGoal(currentNode);
 		if(act != null){
 			_actionNow = act;

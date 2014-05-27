@@ -59,15 +59,13 @@ public class PlanningCenter {
 		return _stepCounter;
 	}
 	
-	public static int newStep(int step){
-		if(_stepCounter < step){
-			System.out.println("Planning Center: New step, clearing old plans!");
-			_stepCounter = step;
-			_stepTime = System.currentTimeMillis();
-			_replanRequired = new Queue<CustomAgent>();
-			for(Map<String, AgentAction> plan : _actionToPlan.values()){
-				plan.clear();
-			}
+	public static int newStep(){
+		_stepCounter++;
+		System.out.println("Planning Center: New step [" + _stepCounter + "], clearing old plans!");
+		_stepTime = System.currentTimeMillis();
+		_replanRequired = new Queue<CustomAgent>();
+		for(Map<String, AgentAction> plan : _actionToPlan.values()){
+			plan.clear();
 		}
 		return _stepCounter;
 	}

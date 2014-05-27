@@ -47,7 +47,8 @@ public abstract class CustomAgent extends Agent {
 	protected int _stepRound;
 	
 	protected Set<String> _innerGoals;
-	private String _destinationGoal;
+	protected String _destinationGoal;
+	protected String _lastGoalReached;
 	private List<Node> _pathToDestinationGoal;
 	
 	protected static final HashSet<String> validPercepts;
@@ -346,6 +347,7 @@ public abstract class CustomAgent extends Agent {
 			println("Trying to reach goal: " + _destinationGoal);
 			if(_destinationGoal.equals(currentNode.getId())){
 				// Goal reached
+				_lastGoalReached = _destinationGoal;
 				_pathToDestinationGoal = null;
 				_destinationGoal = null;
 			}

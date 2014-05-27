@@ -48,7 +48,7 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 	
 	@Override
 	public StepResult step(){
-		_step = PlanningCenter.newStep(_step + 1);
+		_step = PlanningCenter.newStep();
 		DistressCenter.newStep();
 		
 		if(!SharedKnowledge.zoneControlMode() && _step >= _zoneControlModeStepStart){
