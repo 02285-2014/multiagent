@@ -38,14 +38,14 @@ public class ExplorerAgent extends CustomAgent{
 		if(_actionRound < 1){
 			_actionRound = 1;
 			
-			if(!isDisabled()){
-				act = planRecharge(1.0/3.0);
-				if (act != null){
-					_actionNow = act;
-					return;
-				}
-			}else{
+			if(isDisabled() || getHealthRatio() <= DistressCenter.DistressThreshold){
 				DistressCenter.requestHelp(this);
+			}
+			
+			act = planRecharge(1.0/3.0);
+			if (act != null){
+				_actionNow = act;
+				return;
 			}
 		}
 		
@@ -54,7 +54,7 @@ public class ExplorerAgent extends CustomAgent{
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = !isDisabled() ? MarsUtil.rechargeAction() : MarsUtil.skipAction();
+			_actionNow = !isDisabled() ? MarsUtil.rechargeAction() : MarsUtil.rechargeAction();
 			return;
 		}
 		
@@ -118,9 +118,8 @@ public class ExplorerAgent extends CustomAgent{
 			}
 		}
 		
-		if(!isDisabled()){
-			act = planRecharge();
-		}
+
+		act = planRecharge();
 		
 		_actionNow = act != null ? act : MarsUtil.skipAction();
 	}

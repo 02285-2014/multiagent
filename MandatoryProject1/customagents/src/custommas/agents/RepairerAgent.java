@@ -49,24 +49,6 @@ public class RepairerAgent extends CustomAgent {
 	@Override
 	protected void planAction() {
 		Action act = null;
-		
-		// Forklar denne
-		/*if (!SharedKnowledge.zoneControlMode() &&
-				this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThreshold){
-			DistressCenter.requestHelp(this);
-			
-			if(DistressCenter.AgentGettingHelp(this)){
-				String gettingHelpAt = PlanningCenter.helpAt(this);
-				if(gettingHelpAt != null){
-					gotoNode(gettingHelpAt);
-				}
-			} else {
-				if (!SharedKnowledge.zoneControlMode() &&
-						this.getHealth()/this.getMaxHealth() < DistressCenter.DistressThresholdLow){
-					gotoNode(DistressCenter.findNearestNextHelp());
-				}
-			}
-		}*/
 
 		act = planRecharge(3);
 		if (act != null){
@@ -78,7 +60,7 @@ public class RepairerAgent extends CustomAgent {
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = MarsUtil.parryAction();
+			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.rechargeAction();
 			return;
 		}
 		
@@ -127,10 +109,12 @@ public class RepairerAgent extends CustomAgent {
 			return;
 		}
 		
-		act = planSurvey(currentNode, _visibilityRange * 3);
-		if (act != null){
-			_actionNow = act;
-			return;
+		if(!isDisabled()){
+			act = planSurvey(currentNode, SharedKnowledge.zoneControlMode() ? 1 : _visibilityRange * 3);
+			if (act != null){
+				_actionNow = act;
+				return;
+			}
 		}
 		
 		if(!SharedKnowledge.zoneControlMode()){
@@ -141,7 +125,7 @@ public class RepairerAgent extends CustomAgent {
 			}
 		}
 		
-		_actionNow = MarsUtil.parryAction();
+		_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
 	}
 	
 	private Action planDistressHelp(BreadthFirstSearch distressedSearch, String position, Node distressedAgentNode, CustomAgent agentToRepair) {
@@ -169,6 +153,8 @@ public class RepairerAgent extends CustomAgent {
 						nodeHelpAt.getId(),
 						_graph.getEdgeFromNodeIds(position, pathDistressed.peek().getId()).getWeight(),
 						pathDistressed.size());
+				
+				return act;
 			}
 		}
 		

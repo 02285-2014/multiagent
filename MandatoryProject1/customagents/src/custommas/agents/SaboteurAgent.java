@@ -10,6 +10,10 @@ import eis.iilang.Action;
 import massim.javaagents.agents.MarsUtil;
 
 public class SaboteurAgent extends CustomAgent {
+	private String _lastAgentAttacked = null;
+	private int _attackRepeatCurrent = 0;
+	private static int _attackRepeatMax = 4;
+	
 	public SaboteurAgent(String name, String team) {
 		super(name, team);
 		_role = SharedUtil.Agents.Saboteur;
@@ -19,21 +23,21 @@ public class SaboteurAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
-		if(!isDisabled()){
-			act = planRecharge(3);
-			if (act != null){
-				_actionNow = act;
-				return;
-			}
-		}else{
+		if(isDisabled() || getHealthRatio() <= DistressCenter.DistressThreshold){
 			DistressCenter.requestHelp(this);
+		}
+		
+		act = planRecharge(3);
+		if (act != null){
+			_actionNow = act;
+			return;
 		}
 		
 		Node currentNode = _graph.getNode(_position);
 		
 		if(_position == null || currentNode == null){
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
+			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.rechargeAction();
 			return;
 		}
 		
@@ -45,14 +49,22 @@ public class SaboteurAgent extends CustomAgent {
 		
 		if(!isDisabled()){
 			Set<OpponentAgent> nearbyOpponents = super.nearbyOpponents(currentNode, 1);
-			if(nearbyOpponents.size() > 0){
-				_actionNow = MarsUtil.attackAction(SharedUtil.any(nearbyOpponents).getName());
-				return;
+			while(nearbyOpponents.size() > 0){
+				OpponentAgent toAttack = SharedUtil.any(nearbyOpponents);
+				if(_lastAgentAttacked != null || (_lastAgentAttacked.equals(toAttack.getName()) && _attackRepeatCurrent <= _attackRepeatMax)){
+					_lastAgentAttacked = toAttack.getName();
+					_attackRepeatCurrent++;
+					_actionNow = MarsUtil.attackAction(_lastAgentAttacked);
+					return;
+				}
+				nearbyOpponents.remove(toAttack);
 			}
+			_lastAgentAttacked = null;
+			_attackRepeatCurrent = 0;
 		}
 		
 		if(!isDisabled()){
-			act = planSurvey(currentNode, _visibilityRange * 3);
+			act = planSurvey(currentNode, SharedKnowledge.zoneControlMode() ? 1 : _visibilityRange * 3);
 			if (act != null){
 				_actionNow = act;
 				return;

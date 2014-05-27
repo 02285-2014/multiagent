@@ -26,21 +26,21 @@ public class SentinelAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
-		if(!isDisabled()){
-			act = planRecharge(1.0/4.0);
-			if (act != null){
-				_actionNow = act;
-				return;
-			}
-		}else{
+		if(isDisabled() || getHealthRatio() <= DistressCenter.DistressThreshold){
 			DistressCenter.requestHelp(this);
+		}
+		
+		act = planRecharge(1.0/4.0);
+		if (act != null){
+			_actionNow = act;
+			return;
 		}
 		
 		Node currentNode = _graph.getNode(_position);
 		if(_position == null || currentNode == null) {
 			// I don't know my position
 			println("I DO NOT KNOW WHERE I AM!!!");
-			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();
+			_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.rechargeAction();
 			return;
 		}
 		
@@ -77,18 +77,20 @@ public class SentinelAgent extends CustomAgent {
 			// Reset parrycount
 			_parryCount = 0;
 			
-			if(nearbyOpponents.size() > 0){
-				act = planRun(currentNode);
-				if(act != null) {
-					_actionNow = act;
+			if(!SharedKnowledge.zoneControlMode()){
+				if(nearbyOpponents.size() > 0){
+					act = planRun(currentNode);
+					if(act != null) {
+						_actionNow = act;
+					}
+					_actionNow = MarsUtil.parryAction();
+					return;
 				}
-				_actionNow = MarsUtil.parryAction();
-				return;
-			}	
+			}
 		}
 		
 		if(!isDisabled()){
-			act = planSurvey(currentNode, _visibilityRange * 3);
+			act = planSurvey(currentNode, SharedKnowledge.zoneControlMode() ? 1 : _visibilityRange * 3);
 			if (act != null){
 				_actionNow = act;
 				return;
@@ -103,12 +105,10 @@ public class SentinelAgent extends CustomAgent {
 			}
 		}
 		
-		if(!isDisabled()){
-			act = planRecharge();
-			if(act != null) {
-				_actionNow = act;
-				return;
-			}
+		act = planRecharge();
+		if(act != null) {
+			_actionNow = act;
+			return;
 		}
 		
 		_actionNow = !isDisabled() ? MarsUtil.parryAction() : MarsUtil.skipAction();

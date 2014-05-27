@@ -462,6 +462,10 @@ public abstract class CustomAgent extends Agent {
 		return _health == _maxHealth;
 	}
 	
+	public double getHealthRatio(){
+		return (double)_health / (double)_maxHealth;
+	}
+	
 	public int getEnergy(){
 		return _energy;
 	}
