@@ -136,8 +136,8 @@ public class CustomAgentsInterpreter extends AgentsInterpreter {
 			}*/
 			
 			if(SharedKnowledge.zoneControlMode()){
-				if(_step % 50 == 0){
-					//SharedKnowledge.setZone(null);
+				if(_step % 150 == 0){
+					SharedKnowledge.setZone(null);
 				}
 				
 				if(SharedKnowledge.getZone() == null){
