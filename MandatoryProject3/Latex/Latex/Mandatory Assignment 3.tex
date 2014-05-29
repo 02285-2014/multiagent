@@ -78,23 +78,31 @@ ${}$
 
 \section{Introduction}
 \marginpar{\tt Andreas \& \\ Morten}
-This project is produced while taking the course Artificial Intelligence and Multi-agent systems at the Technical University of Denmark.
+This project was produced while taking the course Artificial Intelligence and Multi-agent systems at the Technical University of Denmark. The project had to be done in groups of 3 to 6 people. For the development of the project, there were 3 iterations, this is the report detailing the third and final iteration.
 
 \subsection{Scenario}
 \marginpar{\tt Andreas \& \\ Morten}
-The scenario is that we have 28 agents with different roles and they are dropped into an unknown environment. The agents have health, a certain amount of energy, a visibility range and specific actions they can do. The environment is a graph consisting of nodes and edges where nodes have a certain value and edges cost a certain amount of energy to traverse. Lastly there is the notion of a score which is the sum of all the nodes a team dominates.
+There are 28 agents with different roles. They are dropped into an unknown environment. The agents have properties (health, max health, energy, max energy), a visibility range and role defining which specific actions they can do. The environment is a graph consisting of vertices and edges where vertices have a certain value and edges cost a certain amount of energy to traverse. Lastly there is the notion of a score which is the accumulated sum of the zone score for a team during the game.
  
-\subsection{Problems}
+\subsection{Problem Analysis}
 \marginpar{\tt Andreas \& \\ Morten}
-There are a lot of problems we have to overcome with a scenario like this. We have no prior knowledge of the graph, where the opponent agents are or where our agents are in relation to eachother in the map. We will describe problems that applies to all agents and problems that are agent-specific.
+The scenario of the game introduces a set of problems to overcome.
+
+\subsubsection{Gathering Knowledge}
+\marginpar{\tt Andreas \& \\ Morten}
+The agents have no prior knowledge of the graph, no knowledge about where the other agents are in relation to each other, nor where the opponent agents are. The agents must be able to share their knowledge and keep track of their opponents.
  
-\subsubsection{Common problems}
+\subsubsection{Working Together}
 \marginpar{\tt Andreas \& \\ Morten}
-We have to gain more knowledge of the graph in order to have a map of the environment. But this map should be shared among all of the agents and the agents should know where the other agents are in this internal map which brings a problem of the agents should have some shared knowledge and they should be able to communicate with each other to coordinate their actions. Lastly there is the problem of an overall strategy that should be shared by all the agents and it should achieve a good score according to the rules of the game.
- 
-\subsubsection{Agent-specific problems}
+The agents might wish to perform the exact same action, this is not beneficial, therefore the agents should be able to work out whom should do what. Preferably in such a way that the agent able to perform the action with the probable best outcome, is chosen to perform it. 
+
+\subsubsection{Scoring}
 \marginpar{\tt Andreas \& \\ Morten}
-There is some agent-specific problems with the repairer agent and the saboteur agent as their primary actions are dependent on other agents. The saboteur's primary assignment is attacking the opponent's agents and the repairer needs to repair our agents when they are disabled.
+The agents must coordinate their actions in accordance with an overall strategy that works towards achieving a good score.
+
+\subsubsection{Agent Strategy}
+\marginpar{\tt Andreas \& \\ Morten}
+A strategy for the agents must be defined. How aggressive should the Saboteur agent be. When should the agents request to be repaired by the Repairer agent. For how long should the agents focus on gathering knowledge and when should they focus on achieving a good score.
 
 \section{Environment}
 \marginpar{\tt Andreas}
@@ -114,7 +122,7 @@ The agents share all their knowledge, that is, they have a centralized knowledge
 
 \section{Strategy}
 \marginpar{\tt Morten}
-When this game starts we have no knowledge about the environment we are in, where the opponent agents or even where our agents are in relation to each other with the exception that they may be able to see each other or opponent agents. Therefore in order to be able to strategize properly for this game we view the game as having two phases. The two phases have been dubbed mapping and zone control mode which we will explain further in this section.
+At game start the agents have no knowledge about the environment. They do not know where their fellow agents are located nor do they know where the opponent agents are. Therefore in order to be able to strategize properly for the game, the games is split into two phases. The two phases have been named the \emph{Mapping} and \emph{Zone Control Mode}.
 
 \subsection{Mapping}
 \marginpar{\tt Andreas}
@@ -122,22 +130,28 @@ When the game starts, the first thing the agents focus on is mapping the environ
 
 \subsection{Zone Control Mode}
 \marginpar{\tt Morten}
-When we have mapped a sufficiently amount of the map we go into zone control mode. We have decided that at step 150 of the game we enter zone control mode. Zone control mode is the phase where we defend a zone of the map, i.e. a subgraph of the entire graph. In zone control mode the agents only defend this zone and do not care about what the opponent is doing unless the opponent is attacking us or threatening the zone in any way. We enter the zone control mode because we want to acheive a good score and thereby outscore our opponents. The game grants points based on various factors. One of them is the zone score. Score is defined by us as the zone score, therefore the notion of a good score is a high zone score. We have several algorithms that finds a high scoring zone in the graph, which we will cover in the section Zone Control. At each 150th step while in zone control mode we recalculate to find a high scoring zone to see if we can expand the current zone or find another zone and thereby acheive an even higher score.
+At step 150 in the game, Zone Control Mode is activated. This is based on the assumption that a great part of the environment is mapped at step 150. Zone control mode is the phase where the agents defend a zone of the map, i.e. a subgraph of the entire graph. In zone control mode the agents only defend this zone and do not care about what the opponents are doing unless they are attacking us or threatening the zone in any way.\\
+\\
+Zone control mode is activated because the goal of the game is to achieve the highest score. The game grants points based on the zone score for the team. We have several algorithms that finds a high scoring zone in the graph, which we will cover in the section Zone Control. At each 150th step while in zone control mode, a zone recalculation is made, to see if a higher scoring zone can be found or if there is a way to expand the current zone.
 
 \subsection{Reflection}
 \marginpar{\tt Morten}
-Our strategy for this game is quite simple. When we enter zone control mode our agents are practically standing still with the hope that this would outscore our opponents. This might however not be the case for several reasons.
+Our strategy for the game is quite simple. When we enter zone control mode our agents are practically standing still with the hope that this would outscore our opponents. This might however not be the case for several reasons.
+
 \begin{itemize}
-\item If we haven't mapped (probed) the highest scoring zone of the map and the opponent controls this zone. We have no plan in place to counter this scenario and will therefore be outscored by the opponent and loose.
-\item If our Explorer agents in the first phase haven't probed many nodes due to being disabled then we may end up defending a zone that does not acheive a high score. This again is a scenario we have no plan in place to counter as the Explorer agents will not probe any nodes not in our controlled zone when entering zone control mode.
+	\item If the agents haven't mapped, and probed, the highest scoring zone of the map and the opponent controls this zone. We have no plan in place to counter this scenario and will therefore be outscored by the opponent and loose.
+	
+	\item If the Explorer agents in the first phase haven't probed many nodes due to being disabled then we may end up defending a zone that does not achieve a high score. This again is a scenario we have no plan in place to counter as the Explorer agents will not probe any nodes not in our controlled zone when entering zone control mode.
 \end{itemize}
-There are many other scenarios we could consider but what one ultimately finds is that our strategy is quite naive. Also if we try to defend a zone where the opponents are we will fight for this zone until we recalculate to find a zone. Our strategy would therefore be the object of a modification if more time had allowed it as we in general do not counter our opponents as much as we should.
+
+There are other scenarios we could consider but what one ultimately finds is that our strategy is quite naive. Also if the agents try to defend a zone where the opponents are, the agents will fight for this zone until a zone recalculation is made to find another zone. Our strategy would therefore be an obvious thing to improve if more time had allowed it, as we in general do not counter our opponents as much as we should.
 
 \section{Agents}
 \marginpar{\tt Andreas}
 Each agent has a specific role. Depending on their assigned role, certain properties and abilities are available to the agent. The available agent roles are Explorer, Inspector, Repairer, Saboteur and Sentinel.\\
 \\
-The agents make use of the \emph{Beliefs, Intentions, Desires} schema. This means that each agent has its own beliefs, its own intentions and its own desires. A belief is an assumption about the environment, though the agents are certain that a vertex will not change position, they are not certain that an opponent agent spotted will not move away. Therefore not all beliefs cannot be determined to be facts. An intention is something the agent intents to do. The role specific actions for the agents, determine their intentions. The Explorer agent intents to probe unprobed vertices, the Saboteur agent intents to sabotage the opponent agents and so forth. The desires of the agents are immediate desires like, "I wish to go to vertex v233".
+The agents make use of the \emph{Belief-Desire-Intention} software model. This means that each agent has its own beliefs, its own desires and its own intentions. A belief is an assumption about the environment, though the agents are certain that a vertex will not change position, they are not certain that an opponent agent spotted will not move away. Therefore not all beliefs cannot be determined to be facts.
+A desire is something the agent desires to do. The role specific actions for the agents, determine their desires. The Explorer agent desires to probe unprobed vertices, the Saboteur agent desires to sabotage the opponent agent and so forth. The intentions of the agents are immediate intentions like, "I wish to go to vertex v233, on my I will have to pass through vertices v182 and v377".
 
 \subsection{Agent Base}
 \marginpar{\tt Andreas}
@@ -165,9 +179,13 @@ The job of the saboteur agent, how we solve it and what it does during zone cont
 
 \subsection{Sentinel Agent}
 \marginpar{\tt Morten}
-The job of the sentinel agent depends on which phase of the game we are in and of course if it is disabled or not. The sentinel agent is able to perform the following actions: skip, goto, parry, recharge and survey.
+The job of the sentinel agent depends on phase of the game and whether or not the agent is disabled. The Sentinel agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Parry}, {\tt Recharge} and {\tt Survey}.
+
 \subsubsection{Phase 1: Mapping}
-In the first phase the sentinel will help with the mapping by surveying so we can get a better picture of how the graph we are dropped into is connected. This helps us when we have to navigate in the map, especially with a visibility range of 3 as the sentinel agent has. If there is nothing to survey within its visibility range it will walk around to furhter help the mapping process. However being able to survive by itself is important for the sentinel agent because we value it as one of lesser valued agents of the given five. Therefore we want to burden the repairer agent as less as possible with the repairing of sentinel agents. That is why the sentinel agent will parry or run away from an opponent if an opponent is close when we are in phase 1. There is maximum number of five times it will parry as we do not want it to be "locked" in some position. However there are things that rank higher in the hierachy of assignments for the sentinel. If it has less than 1/4 of energy then it will always recharge and if it receives a goal node it will goto this node. It will receive a goal node when we enter zone control mode. If the sentinel is disabled it will request help from one of the repairer agents.
+In the first phase the Sentinel will help with the mapping by surveying unsurveyed edges. The sentinel has a visibility range of 3, meaning it can survey a lot of edges at once. If there is nothing to survey within its visibility range, the Sentinel will walk around randomly to further help the mapping process.
+
+%CONTINUE HERE!
+However being able to survive by itself is important for the Sentinel agent because we value it as one of lesser valued agents of the given five. Therefore we want to burden the repairer agent as less as possible with the repairing of sentinel agents. That is why the sentinel agent will parry or run away from an opponent if an opponent is close when we are in phase 1. There is maximum number of five times it will parry as we do not want it to be "locked" in some position. However there are things that rank higher in the hierachy of assignments for the sentinel. If it has less than 1/4 of energy then it will always recharge and if it receives a goal node it will goto this node. It will receive a goal node when we enter zone control mode. If the sentinel is disabled it will request help from one of the repairer agents.
  
 \subsubsection{Phase 2: Zone control mode}
 In the second phase the planning for the sentinel agent becomes a lot more simple. It will still always recharge if it has less than 1/4 energy left and go to a goal node if it receives such a goal node. Otherwise the sentinel will parry if an opponent is close to defend the zone and if no opponent is close it will recharge. Note that in this phase there is no maximum amount of times the sentinel can parry it will parry until its energy is less than 1/4 of its total. As in phase 1 the sentinel will request help if it is disabled.
