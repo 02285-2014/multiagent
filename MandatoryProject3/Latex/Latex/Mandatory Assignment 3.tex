@@ -78,15 +78,23 @@ ${}$
 
 \section{Introduction}
 \marginpar{\tt Andreas \& \\ Morten}
-Short introduction about the course, where we are taking it.
+This project is produced while taking the course Artificial Intelligence and Multi-agent systems at the Technical University of Denmark.
 
 \subsection{Scenario}
 \marginpar{\tt Andreas \& \\ Morten}
-Short short short scenario description.
-
+The scenario is that we have 28 agents with different roles and they are dropped into an unknown environment. The agents have health, a certain amount of energy, a visibility range and specific actions they can do. The environment is a graph consisting of nodes and edges where nodes have a certain value and edges cost a certain amount of energy to traverse. Lastly there is the notion of a score which is the sum of all the nodes a team dominates.
+ 
 \subsection{Problems}
 \marginpar{\tt Andreas \& \\ Morten}
-The problems to overcome, maybe we should list a problem for each agent a long with some common problems.
+There are a lot of problems we have to overcome with a scenario like this. We have no prior knowledge of the graph, where the opponent agents are or where our agents are in relation to eachother in the map. We will describe problems that applies to all agents and problems that are agent-specific.
+ 
+\subsubsection{Common problems}
+\marginpar{\tt Andreas \& \\ Morten}
+We have to gain more knowledge of the graph in order to have a map of the environment. But this map should be shared among all of the agents and the agents should know where the other agents are in this internal map which brings a problem of the agents should have some shared knowledge and they should be able to communicate with each other to coordinate their actions. Lastly there is the problem of an overall strategy that should be shared by all the agents and it should achieve a good score according to the rules of the game.
+ 
+\subsubsection{Agent-specific problems}
+\marginpar{\tt Andreas \& \\ Morten}
+There is some agent-specific problems with the repairer agent and the saboteur agent as their primary actions are dependent on other agents. The saboteur's primary assignment is attacking the opponent's agents and the repairer needs to repair our agents when they are disabled.
 
 \section{Environment}
 \marginpar{\tt Andreas}
@@ -106,7 +114,7 @@ The agents share all their knowledge, that is, they have a centralized knowledge
 
 \section{Strategy}
 \marginpar{\tt Morten}
-Something short about what our initial strategies have been for the game. We split up the game in two modes, exploring and zone controlling.
+When this game starts we have no knowledge about the environment we are in, where the opponent agents or even where our agents are in relation to each other with the exception that they may be able to see each other or opponent agents. Therefore in order to be able to strategize properly for this game we view the game as having two phases. The two phases have been dubbed mapping and zone control mode which we will explain further in this section.
 
 \subsection{Mapping}
 \marginpar{\tt Andreas}
@@ -114,7 +122,16 @@ When the game starts, the first thing the agents focus on is mapping the environ
 
 \subsection{Zone Control Mode}
 \marginpar{\tt Morten}
-Something about what zone control mode is, why we do it etc.
+When we have mapped a sufficiently amount of the map we go into zone control mode. We have decided that at step 150 of the game we enter zone control mode. Zone control mode is the phase where we defend a zone of the map, i.e. a subgraph of the entire graph. In zone control mode the agents only defend this zone and do not care about what the opponent is doing unless the opponent is attacking us or threatening the zone in any way. We enter the zone control mode because we want to acheive a good score and thereby outscore our opponents. The game grants points based on various factors. One of them is the zone score. Score is defined by us as the zone score, therefore the notion of a good score is a high zone score. We have several algorithms that finds a high scoring zone in the graph, which we will cover in the section Zone Control. At each 150th step while in zone control mode we recalculate to find a high scoring zone to see if we can expand the current zone or find another zone and thereby acheive an even higher score.
+
+\subsection{Reflection}
+\marginpar{\tt Morten}
+Our strategy for this game is quite simple. When we enter zone control mode our agents are practically standing still with the hope that this would outscore our opponents. This might however not be the case for several reasons.
+\begin{itemize}
+\item If we haven't mapped (probed) the highest scoring zone of the map and the opponent controls this zone. We have no plan in place to counter this scenario and will therefore be outscored by the opponent and loose.
+\item If our Explorer agents in the first phase haven't probed many nodes due to being disabled then we may end up defending a zone that does not acheive a high score. This again is a scenario we have no plan in place to counter as the Explorer agents will not probe any nodes not in our controlled zone when entering zone control mode.
+\end{itemize}
+There are many other scenarios we could consider but what one ultimately finds is that our strategy is quite naive. Also if we try to defend a zone where the opponents are we will fight for this zone until we recalculate to find a zone. Our strategy would therefore be the object of a modification if more time had allowed it as we in general do not counter our opponents as much as we should.
 
 \section{Agents}
 \marginpar{\tt Andreas}
@@ -148,7 +165,12 @@ The job of the saboteur agent, how we solve it and what it does during zone cont
 
 \subsection{Sentinel Agent}
 \marginpar{\tt Morten}
-The job of the sentinel agent, how we solve it and what it does during zone control mode etc.
+The job of the sentinel agent depends on which phase of the game we are in and of course if it is disabled or not. The sentinel agent is able to perform the following actions: skip, goto, parry, recharge and survey.
+\subsubsection{Phase 1: Mapping}
+In the first phase the sentinel will help with the mapping by surveying so we can get a better picture of how the graph we are dropped into is connected. This helps us when we have to navigate in the map, especially with a visibility range of 3 as the sentinel agent has. If there is nothing to survey within its visibility range it will walk around to furhter help the mapping process. However being able to survive by itself is important for the sentinel agent because we value it as one of lesser valued agents of the given five. Therefore we want to burden the repairer agent as less as possible with the repairing of sentinel agents. That is why the sentinel agent will parry or run away from an opponent if an opponent is close when we are in phase 1. There is maximum number of five times it will parry as we do not want it to be "locked" in some position. However there are things that rank higher in the hierachy of assignments for the sentinel. If it has less than 1/4 of energy then it will always recharge and if it receives a goal node it will goto this node. It will receive a goal node when we enter zone control mode. If the sentinel is disabled it will request help from one of the repairer agents.
+ 
+\subsubsection{Phase 2: Zone control mode}
+In the second phase the planning for the sentinel agent becomes a lot more simple. It will still always recharge if it has less than 1/4 energy left and go to a goal node if it receives such a goal node. Otherwise the sentinel will parry if an opponent is close to defend the zone and if no opponent is close it will recharge. Note that in this phase there is no maximum amount of times the sentinel can parry it will parry until its energy is less than 1/4 of its total. As in phase 1 the sentinel will request help if it is disabled.
 
 \section{Planning}
 \marginpar{\tt Andreas}
@@ -164,31 +186,44 @@ Explain that agents can call for help, that repairers respond and that the distr
 
 \section{Zone Control}
 \marginpar{\tt Morten}
-What is zone controlling, what is a good zone.
+Zone control is where we defend a zone from our opponents. As mentioned earlier a good zone is a high scoring zone. In this section we will outline and compare the different algorithms we have implemented to find a high scoring zone, where only one is used in the final implementation. Finally we will explain how we guard the zone.
 
 \subsection{Algorithms}
 \marginpar{\tt Andreas \& \\ Morten}
-Thoughts about how to get a good zone.
+There are a lot of approaches to achieving a good zone. One we have discussed a lot was finding a corner and then isolating this corner by making a "wall" in the map. This will cause a lot of nodes to be dominated by us and then it will probably achieve a high score even though our decision to isolate this corner had nothing to do with calculating the score of the nodes. However we have not found a way to identify corners which has lead us to consider other approaches. In the following sections we will describe these approaches and the algorithms we have implemented for this approach.
 
 \subsubsection{Isolated Subgraph}
 \marginpar{\tt Morten}
-Pick a big node, expand around it.
+The isolated subgraph is an approach where we pick a high valued node and then we build a zone around this node. This node becomes the center of the zone. The algorithm depends on how many agents we can use to build a zone. It will expand from the center node until we reach a number of nodes higher than the amount of agents. Then it will place the agents such that we dominate all the nodes inside this zone.
 
 \subsubsection{Max Sum Component}
 \marginpar{\tt Andreas}
 Find connected components, take the one with maximum sum of specific size.
 
-\subsubsection{Simmulated Annealing}
+\subsubsection{Simulated Annealing}
 \marginpar{\tt Morten}
-Something super smart and awesome here!
+Simulated annealing is an approach which locates a good approximation to the global optimum for a given function in a large search space. Simulated annealing is a good approach to locating a high scoring zone because the agents only have a certain amount of time to respond to the server and the map is a large search space. With other words the goal is to find an acceptably good solution in a fixed amount of time, rather than the best possible solution. The smart thing about simulated annealing is that it will probalistically choose a solution if it is worse than the current solution found and always choose the new solution if it is better. The reason that it is smart to accept a worse solution is that it will never get stuck at a local optimum.\\
+Our implementation of simulated annealing uses the previous algorithm described which finds a connect component of a fixed size and then expands this component for the purpose of getting  a higher scoring zone. We discovered that the algorithm max sum component was really fast so instead of choosing a random node and try to expand around that we could just as well use this algorithm. The algorithm expands the zone by using the rules described for controllng a zone. It picks a random node which is not already dominated by us and is adjacent to one of the nodes we already have an agent placed at. Our implemntation runs until the variable $temperature > 1$ where its initial value is 1000 and each iteration the temperature will "cool" by $0.025$. The function to deem a solution acceptable (if the new solution is not a higher scoring zone) is Euler's number $e$ raised to $(currentScore - newScore) / temperature)$, where $currentScore$ it the score of the current created zone and $newScore$ is the score of the newly created zone.
+$$e^{(currentScore - newScore) / temperature}$$
+If this function is greater than a (pseudo) random number between 0 and 1 we accept the new solution.
 
 \subsubsection{Comparison}
 \marginpar{\tt Morten}
-Input real test numbers here!
+In this section we will compare the algorithm by simulation a game versus only one opponent which will only skip so we can see the outcome of the algorithms in the most optimal setting.
+\begin{center}
+\begin{tabular}{| c c |}
+\hline
+Algorithm & Score\\ \hline
+Isolated Subgraph & 0 \\
+Max Sum Component & 0 \\
+Simulated Annealing & 0 \\
+\hline
+\end{tabular}
+\end{center}
 
 \subsection{Guarding The Zone}
 \marginpar{\tt Morten}
-What does it mean to guard a zone, how do we plan to do it.
+We guard our zone by having all the agents which are able to parry parry such that they survive when enemies attack them. If opponents are able to intrude our zone we attack them with the hope of killing them and regaining control of our zone. We also guard our zone by repairing all the agents that become disabled as the result of an intrusion or attack on our zone in order not to lose points.
 
 \section{Conclusion}
 \marginpar{\tt Andreas \& \\ Morten \& \\ Peter}
