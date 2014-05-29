@@ -72,6 +72,10 @@ Peter \textsc{Carlslund}\\
 
 ${}$
 \vspace{-.55cm}
+
+\tableofcontents
+\clearpage
+
 \section{Introduction}
 \marginpar{\tt Andreas \& \\ Morten}
 Short introduction about the course, where we are taking it.
@@ -86,19 +90,19 @@ The problems to overcome, maybe we should list a problem for each agent a long w
 
 \section{Environment}
 \marginpar{\tt Andreas}
-Short introduction of the environment (map to be explored, knowledge to be shared, agents needing to communictate)...
+The environment is randomly generated, that means assumptions about the environment should not be made. Further the agents are placed at random. The agents are allowed to communicate and share their knowledge.
 
 \subsection{Map}
 \marginpar{\tt Andreas}
-Explain that the environment is represented as an edge weighted graph, nodes has to be probed, edges has to be surveyed etc.
+The map of the environment is being represented as an edge weighted graph. Each vertex has a value indicating its score, each edge has a weight indicating the energy cost of crossing the edge.\\
+\\
+The distance between two connected vertices will be referred to as a \emph{step}. The amount of steps away the agents can perceive, varies from 1 to 3. Whenever an agent perceives a vertex, he will remember the vertex, including the connecting vertices and the edges between them.\\
+\\
+The vertices has to be probed to obtain information about how valuable the vertex is. Only the \emph{Explorer} agent can probe vertices. If a vertex is not probed, the value of the vertex is set to be 1. The edges has to be surveyed to obtain information about how much it costs to cross them. All agents can survey edges. The costs of crossing an edge is not depending on whether the edge is surveyed or not. Knowing the edge costs gives advantages when calculating paths for the agents to follow, i.e. shorter paths with lower costs.
 
 \subsection{Knowledge}
 \marginpar{\tt Andreas}
-Explain that all knowledge is shared among the agents.
-
-\subsection{Communication}
-\marginpar{\tt Andreas}
-Explain that the agents use their shared knowledge to perceive the world, but they communicate when in need of help
+The agents share all their knowledge, that is, they have a centralized knowledge base. The agents therefore also have the same perception of the environment. The agents share all their new percepts before planning what they should do next. Having a centralized knowledge base, eliminates the need for communicating messages regarding perceptions of the environment, i.e. new vertices, new edges, opponent spotted.
 
 \section{Strategy}
 \marginpar{\tt Morten}
@@ -106,7 +110,7 @@ Something short about what our initial strategies have been for the game. We spl
 
 \subsection{Mapping}
 \marginpar{\tt Andreas}
-Something about who does what while mapping.
+When the game starts, the first thing the agents focus on is mapping the environment. The Explorer agent focus on probing vertices, looking for unprobed vertices etc. The other agents walk around randomly looking for unsurveyed edges and opponents. The agents will only try to survey the surrounding edges if a specific amount of unsurveyed edges are visible. This avoids spending too much time surveying when only a few unsurveyed edges are near.
 
 \subsection{Zone Control Mode}
 \marginpar{\tt Morten}
@@ -114,19 +118,25 @@ Something about what zone control mode is, why we do it etc.
 
 \section{Agents}
 \marginpar{\tt Andreas}
-Some general stuff about the agents here. Mentioning there are five different types etc.
+Each agent has a specific role. Depending on their assigned role, certain properties and abilities are available to the agent. The available agent roles are Explorer, Inspector, Repairer, Saboteur and Sentinel.\\
+\\
+The agents make use of the \emph{Beliefs, Intentions, Desires} schema. This means that each agent has its own beliefs, its own intentions and its own desires. A belief is an assumption about the environment, though the agents are certain that a vertex will not change position, they are not certain that an opponent agent spotted will not move away. Therefore not all beliefs cannot be determined to be facts. An intention is something the agent intents to do. The role specific actions for the agents, determine their intentions. The Explorer agent intents to probe unprobed vertices, the Saboteur agent intents to sabotage the opponent agents and so forth. The desires of the agents are immediate desires like, "I wish to go to vertex v233".
 
 \subsection{Agent Base}
 \marginpar{\tt Andreas}
-Something about the {\tt CustomAgent} that all the agents derive from, explaining that some of the logic is used within all the agents.
+The agents have some properties, functionality and actions in common. The agents start by interpreting their percepts, thereby gathering new knowledge and intel regarding the opponent team. The agents are able to determine if an agent is nearby based on the shared knowledge of the environment and the opponent positions. The agents are able to find a path from their current vertex to a goal vertex.
 
 \subsection{Explorer Agent}
 \marginpar{\tt Andreas}
-The job of the explorer agent, how we solve it and what it does during zone control mode etc.
+The Explorer agent is the only agent capable of probing vertices. The Explorer agent prefers its possible actions in the following order: {\tt Recharge} if energy is below $\frac{1}{3}$ of max, {\tt Probe} if standing on unprobed vertex, {\tt Goto} vertex found to be goal vertex, {\tt Survey} edges if enough unsurveyed are found, {\tt Goto \& Probe} nearest unprobed vertex, {\tt Recharge} if energy is not full otherwise {\tt Skip}.\\
+\\
+During the initial phase of the game, the agent probes as much as possible. During Zone Control mode, the agent will only probe unprobed vertices within the zone the agents are trying to control.
 
 \subsection{Inspector Agent}
 \marginpar{\tt Andreas}
-The job of the inspector agent, how we solve it and what it does during zone control mode etc.
+The Inspector agent is the only agent capable of inspecting opponents agents. Inspecting an opponent agent reveals the agents role and properties, i.e. health and energy. The Inspector agent prefers its possible actions in the following order: {\tt Recharge} if energy is below 3, {\tt Goto} vertex found to be goal vertex, {\tt Inspect} opponent agent if one is nearby that hasn't already been inspected, {\tt Survey} edges if enough unsurveyed are found, {\tt Goto} random neighbor vertex, {\tt Recharge} if energy is not full otherwise {\tt Skip}.\\
+\\
+During the initial phase of the game, the agent walks around randomly inspecting nearby opponents and surveying unsurveyed edges. During Zone Control mode, the agent will inspect a nearby opponent if present, the agent will not track down the opponent to inspect them.
 
 \subsection{Repairer Agent}
 \marginpar{\tt Andreas \& \\Peter}
