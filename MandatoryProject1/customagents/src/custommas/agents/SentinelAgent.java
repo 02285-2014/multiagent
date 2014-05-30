@@ -26,7 +26,7 @@ public class SentinelAgent extends CustomAgent {
 	protected void planAction() {
 		Action act = null;
 		
-		if(isDisabled() || getHealthRatio() <= DistressCenter.DistressThreshold){
+		if(isDisabled()){
 			DistressCenter.requestHelp(this);
 		}
 		
