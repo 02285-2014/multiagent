@@ -116,6 +116,9 @@ public class ExplorerAgent extends CustomAgent{
 			if(_actionRound == 3){
 				//if(SharedKnowledge.getMaxSumComponent() != null && SharedKnowledge.getMaxSumComponent().getNodes().contains(currentNode)){
 				if(SharedKnowledge.getZone() != null && SharedKnowledge.getZone().getDominated().contains(currentNode)){
+				//	BreadthFirstSearch unprobedSearch = new BreadthFirstSearch(SharedKnowledge.getMaxSumComponent().getGraph());
+				//	Node moveToNode = unprobedSearch.findClosestNodeSatisfyingPredicate(currentNode, unprobedPredicate);
+					
 					_specificUnprobed = new HashSet<Node>();
 					for(Node n : SharedKnowledge.getZone().getDominated()){
 						if(!n.isProbed()){

@@ -32,7 +32,7 @@
     
     <entity name="connectionB1" username="b1" password="1" iilang="no" xml="no"/>
     <entity name="connectionB2" username="b2" password="1" iilang="no" xml="no"/>
-    <entity name="connectionB3" username="b3" password="1" iilang="no" xml="no"/>
+    <!-- <entity name="connectionB3" username="b3" password="1" iilang="no" xml="no"/>
     <entity name="connectionB4" username="b4" password="1" iilang="no" xml="no"/>
     <entity name="connectionB5" username="b5" password="1" iilang="no" xml="no"/>
     <entity name="connectionB6" username="b6" password="1" iilang="no" xml="no"/>
@@ -57,6 +57,6 @@
     <entity name="connectionB25" username="b25" password="1" iilang="no" xml="no"/>
     <entity name="connectionB26" username="b26" password="1" iilang="no" xml="no"/>
     <entity name="connectionB27" username="b27" password="1" iilang="no" xml="no"/>
-    <entity name="connectionB28" username="b28" password="1" iilang="no" xml="no"/>
+    <entity name="connectionB28" username="b28" password="1" iilang="no" xml="no"/> -->
   </entities>
 </interfaceConfig>

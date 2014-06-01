@@ -2,6 +2,7 @@ package custommas.common;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class SharedKnowledge {
 	private static Map<String, OpponentAgent> _opponents = new HashMap<String, OpponentAgent>();
 	private static boolean _zoneControlMode = false;
 	private static Subgraph _zone;
+	public static Set<Node> _subgraph;
 	
 	private static int _teamScore = 0;
 	private static int _zoneScore = 0;

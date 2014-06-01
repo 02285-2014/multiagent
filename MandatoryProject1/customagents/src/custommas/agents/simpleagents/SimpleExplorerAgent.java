@@ -25,6 +25,7 @@ public class SimpleExplorerAgent extends Agent {
 
 	@Override
 	public Action step() {
+		if(true) return MarsUtil.skipAction();
 
 		handleMessages();
 		handlePercepts();
