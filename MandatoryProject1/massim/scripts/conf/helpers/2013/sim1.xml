@@ -9,7 +9,7 @@
 				optimaWeight = "100"
 				blurIterations = "8"
 				optimaPercentage = "5"
-				randomSeed = "1337">
+				randomSeed = "">
 			
 			&actions;
 			&roles;	

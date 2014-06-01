@@ -92,7 +92,7 @@
 	<agent agentclass="massim.competition2013.GraphSimulationAgent" agentcreationclass="massim.competition2013.GraphSimulationAgentParameter" team="blue">
 		<configuration roleName="Explorer"/>
 	</agent>
-<!--
+
 	<agent agentclass="massim.competition2013.GraphSimulationAgent" agentcreationclass="massim.competition2013.GraphSimulationAgentParameter" team="blue">
 		<configuration roleName="Explorer"/>
 	</agent>
@@ -171,5 +171,4 @@
 	<agent agentclass="massim.competition2013.GraphSimulationAgent" agentcreationclass="massim.competition2013.GraphSimulationAgentParameter" team="blue">
 		<configuration roleName="Inspector"/>
 	</agent>
--->
 </agents>

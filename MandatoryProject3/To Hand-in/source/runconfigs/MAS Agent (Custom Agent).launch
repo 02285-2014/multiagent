@@ -9,5 +9,5 @@
 <stringAttribute key="org.eclipse.debug.ui.ATTR_CAPTURE_IN_FILE" value="${workspace_loc:/MAS Custom Agents/out}/output.log"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="custommas.app.App"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="MAS Custom Agents"/>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:MAS Custom Agents/configurations/agents/testconfigs/sentinelconfig}"/>
+<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:MAS Custom Agents/configurations/agents/customagent}"/>
 </launchConfiguration>

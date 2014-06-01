@@ -88,7 +88,7 @@ This project was produced while taking the course Artificial Intelligence and Mu
 
 \subsection{Scenario}
 \marginpar{\tt Andreas \& \\ Morten}
-There are 28 agents with different roles. They are dropped into an unknown environment. The agents have properties (health, max health, energy, max energy), a visibility range and role defining which specific actions they can do. The environment is a graph consisting of vertices and edges where vertices have a certain value and edges cost a certain amount of energy to traverse. Lastly there is the notion of a score which is the accumulated sum of the zone score for a team during the game.
+There are 28 agents with different roles. They are dropped into an unknown environment. The agents have properties (health, max health, energy, max energy), a visibility range and a role defining which specific actions they can do. The environment is a graph consisting of vertices and edges, where vertices have a certain value and edges cost a certain amount of energy to traverse. Lastly there is the notion of a score which is the accumulated sum of the zone score for a team during the game.
  
 \subsection{Problem Analysis}
 \marginpar{\tt Andreas \& \\ Morten}
@@ -96,7 +96,7 @@ The scenario of the game introduces a set of problems to overcome.
 
 \subsubsection{Gathering Knowledge}
 \marginpar{\tt Andreas \& \\ Morten}
-The agents have no prior knowledge of the graph, no knowledge about where the other agents are in relation to each other, nor where the opponent agents are. The agents must be able to share their knowledge and keep track of their opponents.
+The agents have no prior knowledge of the environment, no knowledge about where the other agents are in relation to each other, nor where the opponent agents are. The agents must be able to share their knowledge and keep track of their opponents.
  
 \subsubsection{Working Together}
 \marginpar{\tt Andreas \& \\ Morten}
@@ -118,9 +118,9 @@ The environment is randomly generated, that means assumptions about the environm
 \marginpar{\tt Andreas}
 The map of the environment is being represented as an edge weighted graph. Each vertex has a value indicating its score, each edge has a weight indicating the energy cost of traversing the edge. The agents cannot determine specific coordinates of the vertices, thereby making it hard to determine the direction an agent would go.\\
 \\
-The distance between two connected vertices will be referred to as a \emph{step}. The amount of steps away the agents can perceive, varies from 1 to 3. Whenever an agent perceives a vertex, he will remember the vertex, including the connecting vertices and the edges between them.\\
+The distance between two connected vertices will be referred to as a \emph{step}. The amount of steps away the agents can perceive, varies from 1 to 3. Whenever an agent perceives a vertex, the agent will remember the vertex, including the connecting vertices and the edges between them.\\
 \\
-The vertices has to be probed to obtain information about how valuable the vertex is. Only the \emph{Explorer} agent can probe vertices. If a vertex is not probed, the value of the vertex is set to be 1. The edges has to be surveyed to obtain information about how much it costs to traverse them. All agents can survey edges. The costs of traversing an edge is not depending on whether the edge is surveyed or not. Knowing the edge costs gives advantages when calculating paths for the agents to follow, i.e. shorter paths with lower costs.
+The vertices has to be probed to obtain information about how valuable they are. Only the \emph{Explorer} agent can probe vertices. If a vertex is not probed, the value of the vertex is set to be 1. The edges has to be surveyed to obtain information about how much it costs to traverse them. All agents can survey edges. The costs of traversing an edge is not depending on whether the edge is surveyed or not. Knowing the edge costs gives advantages when finding paths for the agents to follow, i.e. shorter paths with lower costs.
 
 \subsection{Knowledge}
 \marginpar{\tt Andreas}
@@ -136,7 +136,7 @@ When the game starts, the first thing the agents focus on is mapping the environ
 
 \subsection{Zone Control Mode}
 \marginpar{\tt Andreas \& \\Morten}
-At step 150 in the game, Zone Control mode is activated. This is based on the assumption that a great part of the environment is mapped at step 150. Zone Control mode is the phase where the agents defend a zone of the map, i.e. a subgraph of the entire graph. In Zone Control mode the agents only defend this zone and do not care about what the opponents are doing unless they are attacking us or threatening the zone in any way.\\
+At step 150 in the game, Zone Control mode is activated. This is based on the assumption that a great part of the environment is mapped at step 150. Zone Control mode is the phase where the agents defend a zone of the map, i.e. a subgraph of the entire graph. In Zone Control mode the agents only defend the zone and do not care about what the opponents are doing unless the opponents are attacking the agents or threatening the zone in any way.\\
 \\
 Zone Control mode is activated because the goal of the game is to achieve the highest score. The game grants points based on the zone score for the team. We have several algorithms that finds a high scoring zone in the graph, which we will cover in the section Zone Control. At each 150th step while in zone control mode, a zone recalculation is made, to see if a higher scoring zone can be found or if there is a way to expand the current zone.
 
@@ -145,15 +145,15 @@ During Zone Control mode the agents are to place themselves at specific vertices
 
 \subsection{Reflection}
 \marginpar{\tt Morten}
-Our strategy for the game is quite simple. When we enter zone control mode our agents are practically standing still with the hope that this would outscore our opponents. This might however not be the case for several reasons.
+Our strategy for the game is quite simple. When Zone Control mode gets activated the agents are practically standing still with the hope that this would outscore the opponent team. This might however not be the case for several reasons.
 
 \begin{itemize}
-	\item If the agents haven't mapped, and probed, the highest scoring zone of the map and the opponent controls this zone. We have no plan in place to counter this scenario and will therefore be outscored by the opponent and loose.
+	\item If the agents haven't mapped, and probed, the highest scoring zone of the map and the opponent controls this zone. There is no plan in place to counter this scenario and will therefore be outscored by the opponent and loose.
 	
-	\item If the Explorer agents in the first phase haven't probed many nodes due to being disabled then we may end up defending a zone that does not achieve a high score. This again is a scenario we have no plan in place to counter as the Explorer agents will not probe any nodes not in our controlled zone when entering zone control mode.
+	\item If the Explorer agents in the first phase haven't probed many nodes due to being disabled then the agents may end up defending a zone that does not achieve a high score. This again is a scenario that there is no plan in place to counter as the Explorer agents will not probe any nodes not in the controlled zone when entering zone control mode.
 \end{itemize}
 
-There are other scenarios we could consider but what one ultimately finds is that our strategy is quite naive. Also if the agents try to defend a zone where the opponents are, the agents will fight for this zone until a zone recalculation is made to find another zone. Our strategy would therefore be an obvious thing to improve if more time had allowed it, as we in general do not counter our opponents as much as we should.
+There are other scenarios to consider but what one ultimately finds is that our strategy is quite naive. Also if the agents try to defend a zone where the opponents are, the agents will fight for this zone until a zone recalculation is made to find another zone. The strategy would therefore be an obvious thing to improve if more time had allowed it, as in general the agents do not counter their opponents as much as they should.
 
 \section{Agents}
 \marginpar{\tt Andreas}
@@ -170,14 +170,16 @@ Each action available for the agents requires a certain amount of energy. The am
 \marginpar{\tt Andreas}
 The agents have some properties, functionality and actions in common. The agents start by interpreting their percepts, thereby gathering new knowledge and intel regarding the opponent team. The agents are able to determine if an agent is nearby based on the shared knowledge of the environment and the opponent positions. The agents are able to find a path from their current vertex to a goal vertex. The agents are able to make distress calls, which indicates that they're in need of repairing.\\
 \\
-In the event that an agent tries to perform an action but receives notification that they do not have enough energy to do so, the agent is forced to perform a {\tt Recharge} before attempting to do the same action again. This avoids the case when an agent has an intention to do something, but not enough energy to do it, which could lead to an agent being stuck.
+In the event that an agent tries to perform an action but receives notification that they do not have enough energy to do so, the agent is forced to perform a {\tt Recharge} before attempting to do the same action again. This avoids the case when an agent has an intention to do something, but not enough energy to do it, which could lead to an agent being stuck.\\
+\\
+When Zone Control mode is activated, the agents will be given a goal vertex to {\tt Goto}. The agents will make a an individual plan for reaching the goal vertex.
 
 \subsection{Explorer Agent}
 \marginpar{\tt Andreas}
 The Explorer agent is the only agent capable of probing vertices. The Explorer agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Recharge}, {\tt Survey} and {\tt Probe}.
 
 \subsubsection*{Phase 1: Mapping}
-The Explorer agent is a valued agent during the first phase. The Explorer should probe as many unprobed vertices as possible. Due to this, it prefers probing over surveying. If the Explorer is standing on an already probed vertex, it will find the closest unprobed vertex, {\tt Goto} it and {\tt Probe} it. The Explorer has a visibility range of 2, which makes it capable to perceive a good amount of vertices and edges while walking around the environment. The Explorer will try to survey unsurveyed edges if it can see at least 6 unsurveyed edges. The Explorer agent is vital for achieving a good zone score, as unprobed vertices only grants 1 point. Therefore the Explorer agent makes a distress call if its health drops below 40\%. Whenever the Explorer energy drops below $\frac{1}{3}$ it will {\tt Recharge}.
+The Explorer agent is a valued agent during the first phase. The Explorer should probe as many unprobed vertices as possible. Due to this, it prefers probing over surveying. If the Explorer is standing on an already probed vertex, it will find the closest unprobed vertex, {\tt Goto} it and {\tt Probe} it. The Explorer has a visibility range of 2, which makes it capable of perceiving a good amount of vertices and edges while walking around the environment. The Explorer will try to survey unsurveyed edges if it can see at least 6 unsurveyed edges. The Explorer agent is vital for achieving a good zone score, as unprobed vertices only grants 1 point. Therefore the Explorer agent makes a distress call if its health drops below 40\%. Whenever the Explorer energy drops below $\frac{1}{3}$ it will {\tt Recharge}.
 
 \subsubsection*{Phase 2: Zone Control Mode}
 When Zone Control mode is activated, the Explorer will {\tt Goto} a goal node to maintain the zone. While maintaining a zone, the Explorer will stand still, performing {\tt Recharge} if energy is not full otherwise it will {\tt Skip}. If an unprobed vertex is found within the maintained zone, the Explorer will {\tt Goto} it and {\tt Probe} it to further increase the zone score. If the Explorer becomes disabled, it will make a distress call.
@@ -194,20 +196,20 @@ During Zone Control mode, the Inspector will {\tt Goto} a goal vertex and stand 
 
 \subsection{Repairer Agent}
 \marginpar{\tt Andreas \& \\Peter}
-The Repairer agent is the only agent capable of repairing other agents. The Repairer agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Recharge}, {\tt Survey} and {\tt Repair}.
+The Repairer agent is the only agent capable of repairing other agents. The Repairer agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Parry}, {\tt Recharge}, {\tt Survey} and {\tt Repair}.
 
 \subsubsection*{Phase 1: Mapping}
 When the mapping process is going on, the Repairer agent will help with the mapping by surveying unsurveyed edges. The Repairer has a limited visibility range of 1 and can therefore not see very far. The most important job for the Repairer is to help its fellow agents when they're in distress. The Repairer agent responds to distress calls. When responding to a distress call, the Repairer will {\tt Goto} the fellow agent in distress and {\tt Repair} them. If no agents are distressed, the Repairer agent will walk around randomly. If the energy of the Repairer drops below 3, it will {\tt Recharge}. The Repairer will not make a distress call if its disabled, this is because the Repairer can still use {\tt Repair} even when disabled. The Repairer agent cannot repair it self.
 
 \subsubsection*{Phase 2: Zone Control Mode}
-When in Zone Control mode, the Repairer will {\tt Goto} a goal vertex and stand still. If a fellow agent is making a distress call the Repairer agent will respond to it. As in phase 1, if the Repairers energy drops below 3, it will {\tt Recharge}. While standing still and not disabled with no distress calls to handle, the Repairer will {\tt Parry}.
+When in Zone Control mode, the Repairer will {\tt Goto} a goal vertex and stand still. If a fellow agent is making a distress call the Repairer agent will respond to it. After the Repairer has helped a distressed fellow agent, the Repairer will return to the goal vertex it was standing on before helping the fellow agent. As in phase 1, if the Repairers energy drops below 3, it will {\tt Recharge}. While standing still and not disabled with no distress calls to handle, the Repairer will {\tt Parry}.
 
 \subsection{Saboteur Agent}
 \marginpar{\tt Andreas \& \\Peter}
-The Saboteur agent is the only agent capable of sabotaging the opponent agents. The Saboteur agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Recharge}, {\tt Survey} and {\tt Attack}.
+The Saboteur agent is the only agent capable of sabotaging the opponent agents. The Saboteur agent is able to perform the following actions: {\tt Skip}, {\tt Goto}, {\tt Parry}, {\tt Recharge}, {\tt Survey} and {\tt Attack}.
 
 \subsubsection*{Phase 1: Mapping}
-In the first phase, the Saboteur will help with the mapping by surveying unsurveyed edges. The Saboteur has a limited visibility range of 1 and can therefore not see very far. The most important job for the Saboteur is to attack the opponent agents, hopefully disabling them. The Saboteur attacks an opponent agent when it sees one. To avoid getting stuck by continuously attacking the same agent over and over, the Saboteur will attack the same opponent a maximum of 4 times in a row. The Saboteur does not evaluate the result of its attack, meaning a parried attack will not affect the behavior of the Saboteur. If the energy of the Saboteur drops below 3, it will {\tt Recharge}. The health of the Saboteur drops below 40\% it will make a distress call.
+In the first phase, the Saboteur will help with the mapping by surveying unsurveyed edges. The Saboteur has a limited visibility range of 1 and can therefore not see very far. The most important job for the Saboteur is to attack the opponent agents, hopefully disabling them. The Saboteur attacks an opponent agent when it sees one. To avoid getting stuck by continuously attacking the same agent over and over, the Saboteur will attack the same opponent a maximum of 4 times in a row. The Saboteur does not evaluate the result of its attack, meaning a parried attack will not affect the behavior of the Saboteur. If the energy of the Saboteur drops below 3, it will {\tt Recharge}. If the health of the Saboteur drops below 40\% it will make a distress call.
 
 \subsubsection*{Phase 2: Zone Control Mode}
 In Zone Control mode, the Saboteur will {\tt Goto} a goal vertex and stand still. If an opponent agent steps into the zone where the Saboteur is, the Saboteur will attack the opponent. A maximum of 4 attacks in a row is still in applied. As in phase 1, if the Saboteurs energy drops below 3, it will {\tt Recharge}. While standing still and not disabled, the Saboteur will {\tt Parry}. If the Saboteur becomes disabled, it will make a distress call.
@@ -219,10 +221,10 @@ The job of the Sentinel agent depends on phase of the game and whether or not th
 \subsubsection*{Phase 1: Mapping}
 In the first phase the Sentinel will help with the mapping by surveying unsurveyed edges. The Sentinel has a visibility range of 3, meaning it can survey a lot of edges at once. If there is nothing to survey within its visibility range, the Sentinel will walk around randomly to further help the mapping process.\\
 \\
-Being able to survive by itself is important for the Sentinel agent because we value it as one of the lesser valued agents. Therefore the Sentinel agent should burden the Repairer agents as little as possible. That is why the Sentinel agent will {\tt Parry} or run away from an opponent if an opponent is close during the Mapping phase. The Sentinel agent will {\tt Parry} a maximum of 5 times in a row, as we wanted to avoid the agent being stuck at some position. However there are things that rank higher in the hierarchy of assignments for the Sentinel. If it has less than $\frac{1}{4}$ of energy then it will always {\tt Recharge} and if it receives a goal vertex it will {\tt Goto} this vertex. The Sentinel will receive a goal vertex when Zone Control mode gets activated. If the Sentinel is disabled it will make a distress call.
+Being able to survive by itself is important for the Sentinel agent because we value it as one of the lesser valued agents. Therefore the Sentinel agent should burden the Repairer agents as little as possible. That is why the Sentinel agent will {\tt Parry} or run away from an opponent if an opponent is close during the Mapping phase. The Sentinel agent will {\tt Parry} a maximum of 5 times in a row, as we wanted to avoid the agent being stuck at some position. If the Sentinel has less than $\frac{1}{4}$ of energy then it will {\tt Recharge}. If the Sentinel is disabled it will make a distress call.
  
 \subsubsection*{Phase 2: Zone Control Mode}
-In the second phase the planning for the Sentinel agent becomes a lot more simple. The Sentinel will still always {\tt Recharge} if it has less than $\frac{1}{4}$ energy left and {\tt Goto} a goal vertex if it receives such a goal vertex. Otherwise the Sentinel will parry if an opponent is close to defend the zone and if no opponent is close it will {\tt Recharge}. Note that in this phase there is no maximum amount of times the Sentinel can {\tt Parry} it will {\tt Parry} until its energy is less than $\frac{1}{4}$ of its total. As in phase 1 the Sentinel will make a distress call if it is disabled.
+In the second phase the planning for the Sentinel agent becomes a lot more simple. The Sentinel will still {\tt Recharge} if it has less than $\frac{1}{4}$ energy left and {\tt Goto} a goal vertex if it receives such a goal vertex. Otherwise the Sentinel will parry if an opponent is close to defend the zone and if no opponent is close it will {\tt Recharge}. Note that in this phase there is no maximum amount of times the Sentinel can {\tt Parry} it will {\tt Parry} until its energy is less than $\frac{1}{4}$ of its total. As in phase 1 the Sentinel will make a distress call if it is disabled.
 
 \section{Planning}
 \marginpar{\tt Andreas}
@@ -244,7 +246,7 @@ Zone control is where the agents defend a zone from their opponents. As mentione
 
 \subsection{Algorithms}
 \marginpar{\tt Andreas \& \\ Morten}
-There are a lot of approaches to achieving a good zone. One we have discussed a lot was finding a corner and then isolating this corner by making a "wall" in the map. This will cause a lot of nodes to be dominated by us and then it will probably achieve a high score even though our decision to isolate this corner had nothing to do with calculating the score of the nodes. However we have not found a way to identify corners which has lead us to consider other approaches. In the following sections we will describe these approaches and the algorithms we have implemented.
+There are a lot of approaches to achieving a good zone. One we have discussed a lot was finding a corner and then isolating this corner by making a "frontier" in the map. This will cause a lot of vertices to be dominated by us and then it will probably achieve a high score, even though the decision to isolate the corner had nothing to do with calculating the score of the vertices. However we have not found a way to identify corners which has lead us to consider other approaches. In the following sections we will describe these approaches and the algorithms we have implemented.
 
 \subsubsection{Isolated Subgraph}
 \marginpar{\tt Morten}
@@ -258,9 +260,9 @@ A restriction on the components to find has been set, that is, the components mu
 
 \subsubsection{Simulated Annealing}
 \marginpar{\tt Morten}
-Simulated Annealing is an approach which locates a good approximation to the global optimum for a given function in a large search space. Simulated Annealing is a good approach to locating a high scoring zone because the agents only have a certain amount of time to respond to the server and the map is a large search space. With other words the goal is to find an acceptably good solution in a fixed amount of time, rather than the best possible solution. The smart thing about simulated annealing is that it will probabilistically choose a solution if it is worse than the current solution found and always choose the new solution if it is better. The reason that it is smart to accept a worse solution is that it will never get stuck at a local optimum.\\
+Simulated Annealing is an approach which locates a good approximation to the global optimum for a given function in a large search space. Simulated Annealing is a good approach for locating a high scoring zone because the agents only have a certain amount of time to respond to the server and the map is a large search space. With other words the goal is to find an acceptably good solution in a fixed amount of time, rather than the best possible solution. The smart thing about simulated annealing is that it will probabilistically choose a solution if it is worse than the current solution found and always choose the new solution if it is better. The reason that it is smart to accept a worse solution is that it will never get stuck at a local optimum.\\
 \\
-Our implementation of Simulated Annealing uses the previous algorithm described which finds a connect component of a fixed size and then expands this component for the purpose of getting a higher scoring zone. We discovered that the algorithm max sum component was really fast so instead of choosing a random vertex and try to expand around that, we could just as well use this algorithm. The algorithm expands the zone by using the rules described for controlling a zone. It picks a random vertex which is not already dominated by us and is adjacent to one of the vertices we already have an agent placed at. Our implementation runs until the variable $temperature > 1$ where its initial value is 1000 and each iteration the temperature will "cool" by 2.5\%. The function to deem a solution acceptable (if the new solution is not a higher scoring zone) is Euler's number $e$ raised to $(currentScore - newScore) / temperature$, where $currentScore$ it the score of the current created zone and $newScore$ is the score of the newly created zone.
+Our implementation of Simulated Annealing uses the previous algorithm described which finds a connect component of a fixed size and then expands this component for the purpose of getting a higher scoring zone. We discovered that the algorithm Max Sum Component was really fast so instead of choosing a random vertex and try to expand around that, we could just as well use this algorithm. The algorithm expands the zone by using the rules described for controlling a zone. It picks a random vertex which is not already dominated by us and is adjacent to one of the vertices we already have an agent placed at. The algorithm runs until $temperature < 1$, where $temperature$ is 1000 initially and each iteration $temperature$ will "cool" by 2.5\%. The function to deem a solution acceptable (if the new solution is not a higher scoring zone) is Euler's number $e$ raised to $(currentScore - newScore) / temperature$, where $currentScore$ it the score of the current created zone and $newScore$ is the score of the newly created zone.
 $$e^\frac{currentScore - newScore}{temperature}$$
 If this function is greater than a (pseudo) random number between 0 and 1 we accept the new solution.
 
@@ -290,7 +292,7 @@ A comparison of the algorithms would give an indication of their performance dur
 
 \subsubsection{Our Choice}
 \marginpar{\tt Andreas \& \\ Morten}
-Based on the above comparison, we were intrigued to use the Isolated Subgraph algorithm as it had the best score and best average score. A big downside to using the Isolated Subgraph, is that it scores averages a lot. As the maps are randomly generated, there is no way of telling if we're lucky enough to get a good score or end up with a low score.\\
+Based on the above comparison, we were intrigued to use the Isolated Subgraph algorithm as it had the best score and best average score. A big downside to using the Isolated Subgraph, is that it scores varies a lot. As the maps are randomly generated, there is no way of telling if we're lucky enough to get a good score or end up with a low score.\\
 \\
 Both Max Sum Component and Simulated Annealing are steady. Simulated Annealing has the highest worst score and and a better average score than Max Sum Component. Simulated Annealing is also better at adapting to the opponent team strategy, where Max Sum Component would often find the same zone. Using the same zone for the whole game could give the opponent team some advantages.\\
 \\
@@ -302,7 +304,7 @@ The agents guard their zone by using {\tt Parry} if possible. This increases the
 
 \section{Flaws}
 \marginpar{\tt Peter}
-Below is a list of flaws we have identified in our solution. Had we had more time, we believe most of these flaws could have been fixed.
+Below is a list of flaws we have identified in our solution. We believe most of these flaws could have been fixed, if we have had more time.
 
 \subsection{Generating A Proper Map}
 \marginpar{\tt Peter}
@@ -314,15 +316,15 @@ If the Repairer agents all get disabled its hard to get them repaired and theref
 
 \subsection{Coordinated Repairing}
 \marginpar{\tt Peter}
-When in distress the distressed agents could have met their assigned repairer half way, if not tied up in zone control. If the number of distressed agents are larger than the number of repairer agents, using the knowledge of where repairers would be at next repair, distressed agents could head toward these vertices. This would make it possible for the Repairer agents to quickly repair the other agents in distress.
+When in distress the distressed agents could have met their assigned repairer half way, if not tied up in zone control. If the number of distressed agents are larger than the number of repairer agents, using the knowledge of where repairers would be at their next repair, the distressed agents could head toward these vertices. This would make it possible for the Repairer agents to quickly repair the other agents in distress.
 
 \subsection{Tracking Down The Opponents}
 \marginpar{\tt Peter}
-In stead of randomly walking around the saboteur could have used knowledge on opponents found by other agents.
+In stead of randomly walking around, the Saboteur could have used knowledge on opponents found by other agents.
 
 \subsection{Prioritized Repairing And Attacking}
 \marginpar{\tt Peter}
-Repairers could have prioritized which types of agents to repair  depending on the total state of the individual group of agents and depending on whether in Zone Control mode or the mapping phase. Similarly saboteurs could prioritize repairers, saboteurs or inspectors. If successfully attacking a special group of opponent agents the opponents would have a serious setback.
+Repairers could have prioritized which types of agents to repair  depending on the total state of the individual group of agents and depending on whether in Zone Control mode or the mapping phase. Similarly saboteurs could prioritize repairers, saboteurs or inspectors. If successfully attacking a special group of opponent agents, the opponents would have a serious setback.
 
 \subsection{Making Proper Use Of Inspections}
 \marginpar{\tt Peter}
@@ -338,9 +340,16 @@ There has been no attempt to detect the strategy of the opponent.
 
 \section{Conclusion}
 \marginpar{\tt Andreas \& \\ Morten \& \\ Peter}
-In this report we have outlined how we have solved the problems stated in the problem analysis. We are able to gather knowledge about the environment in the first phase, mapping, of the game. Here the agents' primary assignment is gathering more information about the environment where all the knowledge gathered is stored in a centralized knowledge base. The agents work together by virtue of our Planning Center, which will keep track of which actions the agents want to perform. The Planning Center will prefer the lowest cost action when two agents wish to perform an action that would give the same result. Further the Planning Center will not allow two actions that will achieve exactly the same thing. We use the knowledge base gathered from the first phase when we enter into the second phase, Zone Control mode. We achieve a good score by using an algorithm that finds a connected component of maximum sum and tries to expand that component such that we dominate more vertices and create a high scoring zone. This was our strategy for the game. When we enter the second phase we are only being defensive. We do not try to counter our opponents in any way only in the first phase where we attack our opponents if possible. We are aware that there are flaws in our solution and these would be obvious choice if further improvement to our solution was to be done.
+In this report we have outlined how we have solved the problems stated in the problem analysis. We are able to gather knowledge about the environment during the Mapping phase. Here the agents' primary assignment is gathering more information about the environment where all the knowledge gathered is stored in a centralized knowledge base. The agents work together by virtue of the Planning Center, which will keep track of which actions the agents want to perform. The Planning Center will prefer the lowest cost action when two agents wish to perform an action that would give the same result. Further the Planning Center will not allow two actions that will achieve exactly the same thing. We use the knowledge base gathered from the Mapping phase when we enter into the second phase, Zone Control mode. We achieve a good score by using an algorithm that finds a connected component of maximum sum and tries to expand that component such that we dominate more vertices and create a high scoring zone. This was our strategy for the game. When we enter the second phase we are only being defensive. We do not try to counter our opponents in any way only in the first phase where we attack our opponents if possible. We are aware that there are flaws in our solution and these would be obvious choices if further improvement to our solution was to be done.
 
 \begin{thebibliography}{9}
+
+\bibitem{artiplan}
+	Malik Ghallab, Dana Nau, Paolo Traverso:
+	\emph{Automated Planning: Theory \& Practice}.
+	1st Edition,
+	Morgan Kaufmann,
+	2004.
 
 \bibitem{arti}
  	Stuart J. Russel, Peter Norvig:
